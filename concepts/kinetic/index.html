@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>InboxTales reel — kinetic</title>
+<link rel="stylesheet" href="/shared/base.css">
+<style>
+  .layer { position: absolute; inset: 0; }
+
+  /* ---------- background: white, drifting blobs, faint dot grid in the bleed zones ---------- */
+  #bg { position: absolute; inset: 0; background: #fff; }
+  .dots { position: absolute; inset: 0;
+    background-image: radial-gradient(circle at 2px 2px, rgba(15,17,21,.16) 2px, rgba(15,17,21,0) 2.6px);
+    background-size: 54px 54px; background-position: 26px 20px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0,0,0,0) 400px, rgba(0,0,0,0) 1380px, #000 1920px);
+            mask-image: linear-gradient(to bottom, #000 0, rgba(0,0,0,0) 400px, rgba(0,0,0,0) 1380px, #000 1920px); }
+  .blob { position: absolute; border-radius: 50%; }
+  #blobO { width: 1100px; height: 1100px; left: 420px; top: -330px;
+    background: radial-gradient(closest-side, rgba(250,70,22,.20), rgba(250,70,22,.07) 55%, rgba(250,70,22,0)); }
+  #blobB { width: 1300px; height: 1300px; left: -620px; top: 900px;
+    background: radial-gradient(closest-side, rgba(191,219,254,.95), rgba(219,234,254,.5) 55%, rgba(219,234,254,0)); }
+  #blobO2 { width: 760px; height: 760px; left: 560px; top: 1280px;
+    background: radial-gradient(closest-side, rgba(250,70,22,.13), rgba(250,70,22,0)); }
+
+  /* ---------- line masks ---------- */
+  .m { display: block; overflow: hidden; padding: .1em .08em .17em .08em; margin: -.1em -.08em -.17em -.08em; }
+  .l { display: inline-block; vertical-align: top; }
+
+  /* ---------- S1: hero ---------- */
+  .hero { position: absolute; left: 80px; top: 486px; margin: 0; white-space: nowrap;
+    font-weight: 700; font-size: 176px; line-height: .93; letter-spacing: -.05em; color: var(--charcoal); }
+  .hero .o { color: var(--orange); }
+  #strip { position: absolute; left: 80px; top: 1100px; display: flex; gap: 22px; }
+  .tile { flex: none; width: 290px; height: 352px; border-radius: 44px; overflow: hidden; background: #e9e9ec;
+    box-shadow: 0 34px 60px -34px rgba(15,17,21,.45); }
+  .tile.cap { border-radius: 145px; }
+  .tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  img.cropb { height: 132% !important; object-position: 50% 0; }
+
+  /* ---------- S2: tilted marquee wall ---------- */
+  .wallrot { position: absolute; left: 540px; top: 880px; width: 0; height: 0; transform: rotate(-5deg); }
+  .row { position: absolute; left: 0; width: 0; }
+  .track { position: absolute; left: 0; top: 0; height: 100%; width: max-content; display: flex; align-items: center; white-space: nowrap; }
+  .w { flex: none; font-family: var(--serif); font-style: italic; font-weight: 600; font-size: 116px; line-height: 1;
+    letter-spacing: -.012em; color: var(--charcoal); padding: 0 34px .1em; }
+  .row.on .w { color: #fff; font-size: 128px; padding: 0 40px .09em; }
+  .row.out .w { color: #fff; -webkit-text-stroke: 5px var(--charcoal); paint-order: stroke fill; }
+  .pp { flex: none; width: 214px; height: 112px; border-radius: 56px; overflow: hidden; background: #e9e9ec; }
+  .pp img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .star { flex: none; width: 54px; height: 54px; color: #fff; }
+  .star svg { width: 100%; height: 100%; display: block; }
+  .chip { flex: none; display: inline-flex; align-items: center; gap: 20px; height: 112px; padding: 0 44px 0 18px; margin: 0 12px;
+    border-radius: 9999px; border: 2px solid var(--gray-200); background: #fff; color: var(--charcoal);
+    font-weight: 600; font-size: 44px; letter-spacing: -.03em; line-height: 1; white-space: nowrap; }
+  .chip .ic { flex: none; width: 76px; height: 76px; border-radius: 50%; background: rgba(250,70,22,.11); color: var(--orange);
+    display: grid; place-items: center; }
+  .chip .ic svg { width: 38px; height: 38px; display: block; }
+  .chip.dark { background: var(--charcoal); border-color: var(--charcoal); color: #fff; }
+  .chip.dark .ic { background: var(--orange); color: #fff; }
+  .ph { flex: none; width: 330px; height: 236px; margin: 0 13px; border-radius: 42px; overflow: hidden; background: #e9e9ec; }
+  .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .dc { flex: none; height: 132px; border-radius: 66px; margin: 0 13px; display: grid; place-items: center; }
+  .dc svg { width: 54px; height: 54px; display: block; }
+  .dc.c { width: 132px; }
+  .dc.o { background: var(--orange); color: #fff; }
+  .dc.k { background: var(--charcoal); color: #fff; }
+  .dc.b { background: var(--blue-100); color: var(--charcoal); }
+  .dc.t { background: rgba(250,70,22,.12); color: var(--orange); }
+  .dc.h { background: #fff; border: 2.5px solid var(--gray-200); color: var(--charcoal); }
+
+  #wipeRot { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+  #wipe { position: absolute; inset: 0; background: var(--orange); }
+
+  /* ---------- S3: statement on orange ---------- */
+  .state { position: absolute; left: 80px; top: 500px; margin: 0; white-space: nowrap;
+    font-weight: 700; font-size: 156px; line-height: .96; letter-spacing: -.05em; color: #fff; }
+  .state .it { font-family: var(--serif); font-style: italic; font-weight: 600; font-size: 1.12em; letter-spacing: -.02em; color: var(--charcoal); line-height: .86; }
+  #usp { position: absolute; left: 80px; top: 1066px; }
+  #usp .chip { position: absolute; left: 0; margin: 0; border: 0; height: 120px; padding: 0 50px 0 18px; gap: 22px; font-size: 50px; box-shadow: 0 26px 50px -26px rgba(15,17,21,.5); }
+  #usp .chip .ic { width: 84px; height: 84px; }
+  #usp .chip .ic svg { width: 42px; height: 42px; }
+  #usp .chip .ic { background: var(--charcoal); color: #fff; }
+
+  #s3deco { position: absolute; inset: 0; overflow: hidden; }
+  #s3deco .g1 { position: absolute; width: 1200px; height: 1200px; left: 380px; top: -420px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255,255,255,.2), rgba(255,255,255,0)); }
+  #s3deco .g2 { position: absolute; width: 1500px; height: 1500px; left: -700px; top: 1000px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(120,20,0,.17), rgba(120,20,0,0)); }
+  #s3deco .dt { position: absolute; inset: 0;
+    background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,.34) 2px, rgba(255,255,255,0) 2.6px);
+    background-size: 54px 54px; background-position: 26px 20px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0,0,0,0) 330px, rgba(0,0,0,0) 1440px, #000 1920px);
+            mask-image: linear-gradient(to bottom, #000 0, rgba(0,0,0,0) 330px, rgba(0,0,0,0) 1440px, #000 1920px); }
+  #s3deco .rg { position: absolute; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.3); }
+
+  /* ---------- S4: stats bento ---------- */
+  .card { position: absolute; width: 446px; height: 480px; border-radius: 48px; padding: 38px 40px 40px; overflow: hidden;
+    display: flex; flex-direction: column; }
+  .card .badge { flex: none; width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; }
+  .card .badge svg { width: 40px; height: 40px; display: block; }
+  .card .sp { flex: 1; }
+  .card .num { font-weight: 700; font-size: 164px; line-height: .9; letter-spacing: -.06em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .card .num em { font-style: normal; letter-spacing: 0; margin-left: .02em; }
+  .card .lab { margin-top: 18px; font-weight: 500; font-size: 38px; line-height: 1.12; letter-spacing: -.025em; }
+  #cardA { position: absolute; inset: 0; background: var(--orange); }
+  #cA { left: 80px; top: 452px; color: #fff; }
+  #cA .badge { background: rgba(255,255,255,.2); color: #fff; }
+  #cA .lab { color: rgba(255,255,255,.92); }
+  #cB { left: 554px; top: 452px; background: #fff; border: 2px solid var(--gray-200); box-shadow: 0 40px 70px -46px rgba(15,17,21,.35); }
+  #cB .badge { background: rgba(250,70,22,.11); color: var(--orange); }
+  #cB .num em { color: var(--orange); }
+  #cB .lab, #cC .lab { color: #4B5563; }
+  #cB .bar { margin-top: 22px; height: 12px; border-radius: 6px; background: var(--gray-200); overflow: hidden; }
+  #cB .bar i { display: block; height: 100%; border-radius: 6px; background: var(--orange); transform-origin: 0 50%; }
+  #cC { left: 80px; top: 960px; background: var(--blue-100); }
+  #cC .badge { background: #fff; color: var(--charcoal); }
+  #cC .num em { color: var(--orange); }
+  #cC .segs { margin-top: 22px; display: flex; gap: 10px; }
+  #cC .segs i { display: block; flex: 1; height: 12px; border-radius: 6px; background: var(--charcoal); }
+  #cD { left: 554px; top: 960px; background: var(--charcoal); color: #fff; }
+  #cD > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 60% 50%; }
+  #cD::before { content: ''; position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(to bottom, rgba(15,17,21,.45), rgba(15,17,21,.62) 45%, rgba(15,17,21,.93)); }
+  #cD > *:not(img) { position: relative; z-index: 2; }
+  #cD .badge { background: var(--orange); color: #fff; }
+  #cD .num em { color: var(--orange); }
+  #cD .lab { color: rgba(255,255,255,.9); }
+
+  /* ---------- brand layer: nav pill -> end card ---------- */
+  .endrot { position: absolute; left: 540px; width: 0; height: 0; transform: rotate(-5deg); }
+  .endrot .row { top: -122px; height: 244px; }
+  .et { flex: none; width: 310px; height: 244px; margin: 0 13px; border-radius: 44px; overflow: hidden; background: #e9e9ec; }
+  .et.cap { border-radius: 122px; }
+  .et img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  #nav { position: absolute; left: 80px; top: 272px; width: 920px; height: 116px; border-radius: 58px;
+    background: #fff; border: 2px solid var(--gray-200); box-shadow: 0 26px 60px -30px rgba(15,17,21,.28); }
+  #lockup { position: absolute; left: 0; top: 0; font-size: 112px; white-space: nowrap; }
+  #cta { position: absolute; left: 0; top: 0; height: 128px; padding: 0 20px 0 54px; border-radius: 64px;
+    display: inline-flex; align-items: center; gap: 30px; background: var(--charcoal); color: #fff;
+    font-weight: 600; font-size: 50px; letter-spacing: -.03em; line-height: 1; white-space: nowrap; }
+  #cta .arr { flex: none; width: 88px; height: 88px; border-radius: 50%; background: var(--orange); color: #fff; display: grid; place-items: center; }
+  #cta .arr svg { width: 46px; height: 46px; display: block; stroke-width: 2.4; }
+  #tag { position: absolute; left: 0; top: 808px; width: 1080px; text-align: center; white-space: nowrap;
+    font-family: var(--serif); font-style: italic; font-weight: 600; font-size: 66px; line-height: 1.2; letter-spacing: -.012em; color: var(--charcoal); }
+  .wm { display: inline-block; vertical-align: top; overflow: hidden; padding: .1em .12em .26em; margin: -.1em -.12em -.26em; }
+  .wm > span { display: inline-block; }
+  #url { position: absolute; left: 0; top: 1146px; width: 1080px; text-align: center;
+    font-weight: 500; font-size: 44px; letter-spacing: -.02em; line-height: 1.2; color: var(--gray-500); }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <div id="bg">
+    <div class="blob" id="blobO"></div>
+    <div class="blob" id="blobB"></div>
+    <div class="blob" id="blobO2"></div>
+    <div class="dots"></div>
+  </div>
+
+  <!-- S1: hero headline + photo tiles -->
+  <div id="s1" class="layer">
+    <h1 class="hero" id="hero">
+      <span class="m"><span class="l">Digital</span></span>
+      <span class="m"><span class="l o">Excellence</span></span>
+      <span class="m"><span class="l">Redefined.</span></span>
+    </h1>
+    <div id="stripOut"><div id="strip">
+      <div class="tile"><img src="/assets/web-development.png" alt=""></div>
+      <div class="tile cap"><img src="/assets/mobile-app-dev.png" alt=""></div>
+      <div class="tile"><img class="cropb" src="/assets/creative-design.png" alt=""></div>
+      <div class="tile cap"><img src="/assets/digital-marketing.png" alt=""></div>
+    </div></div>
+  </div>
+
+  <!-- S2: marquee wall (rows are built from data in the script) -->
+  <div id="wall" class="wallrot"></div>
+  <div id="wipeRot"><div id="wipe"></div></div>
+  <div id="wallTop" class="wallrot"></div>
+
+  <!-- S4: stats bento. Order matters: cards B/C/D sit under the orange field (#cardA), which collapses into card A -->
+  <div id="s4wrap" class="layer">
+    <div class="card" id="cB">
+      <i class="badge" data-ic="star"></i><div class="sp"></div>
+      <div class="num"><span id="n2">0</span><em>%</em></div>
+      <div class="lab">Client Satisfaction</div>
+      <div class="bar"><i id="bar2"></i></div>
+    </div>
+    <div class="card" id="cC">
+      <i class="badge" data-ic="clock"></i><div class="sp"></div>
+      <div class="num"><span id="n3">0</span><em>+</em></div>
+      <div class="lab">Years Experience</div>
+      <div class="segs"><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="card" id="cD">
+      <img src="/assets/team-collaboration.png" alt="">
+      <i class="badge" data-ic="users"></i><div class="sp"></div>
+      <div class="num"><span id="n4">0</span><em>+</em></div>
+      <div class="lab">Team Experts</div>
+    </div>
+    <div id="cardA"></div>
+    <div class="card" id="cA">
+      <i class="badge" data-ic="rocket"></i><div class="sp"></div>
+      <div class="num"><span id="n1">0</span><em>+</em></div>
+      <div class="lab">Projects Delivered</div>
+    </div>
+  </div>
+
+  <!-- S3: statement -->
+  <div id="s3deco"><div class="g1"></div><div class="g2"></div><div class="dt"></div><div class="rg" style="width:900px;height:900px;left:520px;top:1590px"></div><div class="rg" style="width:1300px;height:1300px;left:320px;top:1430px"></div></div>
+  <div id="s3" class="layer">
+    <h2 class="state" id="state">
+      <span class="m"><span class="l">Not just</span></span>
+      <span class="m"><span class="l it">another</span></span>
+      <span class="m"><span class="l">web agency.</span></span>
+    </h2>
+    <div id="usp">
+      <div class="chip" style="top:0"><i class="ic" data-ic="bug"></i>Built by Bug Hunters</div>
+      <div class="chip" style="top:142px"><i class="ic" data-ic="zap"></i>Lightning Fast</div>
+      <div class="chip" style="top:284px"><i class="ic" data-ic="clock"></i>24/7 Support</div>
+    </div>
+  </div>
+
+  <!-- End card: photo rows bleeding off the top and bottom edges -->
+  <div id="endTop" class="endrot" style="top:92px"><div class="row"><div class="track"><span class="et"><img src="/assets/creative-design.png" alt="" style="object-position:50% 12%"></span><span class="et cap"><img src="/assets/enterprise-software.png" alt=""></span><span class="et"><img src="/assets/web-development.png" alt=""></span><span class="et cap"><img src="/assets/digital-marketing.png" alt=""></span><span class="et"><img src="/assets/mobile-app-dev.png" alt=""></span><span class="et cap"><img src="/assets/team-collaboration.png" alt=""></span></div></div></div>
+  <div id="endBot" class="endrot" style="top:1716px"><div class="row"><div class="track"><span class="et cap"><img src="/assets/mobile-app-dev.png" alt=""></span><span class="et"><img src="/assets/team-collaboration.png" alt=""></span><span class="et cap"><img src="/assets/web-development.png" alt=""></span><span class="et"><img src="/assets/digital-marketing.png" alt=""></span><span class="et cap"><img src="/assets/creative-design.png" alt="" style="object-position:50% 12%"></span><span class="et"><img src="/assets/enterprise-software.png" alt=""></span></div></div></div>
+
+  <!-- Brand layer: floating nav pill that unpacks into the end card -->
+  <div id="brand" class="layer">
+    <div id="nav"></div>
+    <div id="tag"><span class="wm"><span>Let’s</span></span> <span class="wm"><span>build</span></span> <span class="wm"><span>the</span></span> <span class="wm"><span>extraordinary.</span></span></div>
+    <div id="url">inboxtales.com</div>
+    <div id="cta"><span>Start a Project</span><i class="arr" data-ic="arrow-up-right"></i></div>
+    <div id="lockup" class="logo-lockup"><img src="/assets/logo-mark.png" alt=""><span>Inbox<span class="tales">Tales</span></span></div>
+  </div>
+
+</div>
+<script src="/node_modules/gsap/dist/gsap.min.js"></script>
+<script src="/node_modules/gsap/dist/CustomEase.min.js"></script>
+<script src="/shared/reel.js"></script>
+<script>
+  gsap.registerPlugin(CustomEase);
+  CustomEase.create('snap', '0.16,1,0.3,1');     // fast attack, long settle
+  CustomEase.create('swift', '0.22,1,0.36,1');
+  CustomEase.create('io', '0.76,0,0.24,1');      // confident in-out for wipes / shared-element moves
+
+  // ---------- static DOM build (runs once, before the timeline exists) ----------
+  const svg = body => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
+  const ICONS = {
+    'code': '<path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>',
+    'smartphone': '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
+    'database': '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+    'palette': '<path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>',
+    'shield-check': '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+    'trending-up': '<path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/>',
+    'zap': '<path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/>',
+    'clock': '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    'arrow-up-right': '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
+    'rocket': '<path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09"/><path d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05"/>',
+    'users': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/>',
+    'star': '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
+    'bug': '<path d="M12 20v-9"/><path d="M14 7a4 4 0 0 1 4 4v3a6 6 0 0 1-12 0v-3a4 4 0 0 1 4-4z"/><path d="M14.12 3.88 16 2"/><path d="M21 21a4 4 0 0 0-3.81-4"/><path d="M21 5a4 4 0 0 1-3.55 3.97"/><path d="M22 13h-4"/><path d="M3 21a4 4 0 0 1 3.81-4"/><path d="M3 5a4 4 0 0 0 3.55 3.97"/><path d="M6 13H2"/><path d="m8 2 1.88 1.88"/><path d="M9 7.13V6a3 3 0 1 1 6 0v1.13"/>',
+  };
+  const STAR = '<span class="star"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 0c.6 6.9 5.1 11.4 12 12-6.9.6-11.4 5.1-12 12-.6-6.9-5.1-11.4-12-12 6.9-.6 11.4-5.1 12-12z"/></svg></span>';
+  const W = t => `<span class="w">${t}</span>`;
+  const PP = (n, pos) => `<span class="pp"><img src="/assets/${n}.png" alt=""${pos ? ` style="object-position:${pos}"` : ''}></span>`;
+  const PH = (n, pos) => `<span class="ph"><img src="/assets/${n}.png" alt=""${pos ? ` style="object-position:${pos}"` : ''}></span>`;
+  const CHIP = (ic, t, dark) => `<span class="chip${dark ? ' dark' : ''}"><i class="ic" data-ic="${ic}"></i>${t}</span>`;
+  const DC = (cls, w, ic) => `<span class="dc ${cls}"${w ? ` style="width:${w}px"` : ''}${ic ? ` data-ic="${ic}"` : ''}></span>`;
+  const SERVICES = [
+    ['code', 'Web Development'], ['smartphone', 'Android &amp; iOS Apps'], ['database', 'CRM &amp; Billing Software'],
+    ['palette', 'Creative Design &amp; Video'], ['shield-check', 'Cyber Security &amp; Auditing'], ['trending-up', 'Digital Marketing'],
+  ];
+  const chipRow = (order, darkIdx) => order.map((i, k) => CHIP(SERVICES[i][0], SERVICES[i][1], k % 3 === darkIdx)).join('');
+
+  // y / h are in wall space (origin = wall centre 540,880, tilted -5deg). dir: -1 streams left, +1 streams right.
+  const ROWS = [
+    { cls: 'words', y: -430, h: 150, dir: -1, speed: 170, e: 60,
+      html: W('Digital Strategy') + PP('web-development') + W('Brand Identity') + PP('creative-design') + W('Web Experience') + PP('mobile-app-dev') + W('Digital Strategy') },
+    { cls: 'chips', y: -250, h: 112, dir: 1, speed: 120, e: 40, html: chipRow([3, 4, 5, 0, 1, 2], 1) },
+    { cls: 'words on', top: true, y: -108, h: 186, dir: -1, speed: 230, e: 0,
+      html: W('Mobile Engineering') + STAR + W('Enterprise Security') + STAR + W('Growth Marketing') + STAR + W('Mobile Engineering') },
+    { cls: 'chips', y: 108, h: 112, dir: 1, speed: 150, e: 120, html: chipRow([0, 1, 2, 3, 4, 5], 2) },
+    { cls: 'words out', y: 250, h: 150, dir: -1, speed: 190, e: 20,
+      html: W('UI/UX Design') + PP('digital-marketing') + W('Visual Storytelling') + PP('enterprise-software') + W('UI/UX Design') + PP('team-collaboration') + W('Visual Storytelling') },
+    { cls: 'photos', y: 430, h: 236, dir: 1, speed: 130, e: 0,
+      html: PH('enterprise-software') + PH('creative-design', '50% 12%') + PH('web-development') + PH('cybersecurity-ops', '50% 100%') + PH('digital-marketing') + PH('mobile-app-dev') + PH('team-collaboration') },
+    { cls: 'deco', y: 696, h: 132, dir: -1, speed: 160, e: 30,
+      html: DC('o', 300) + DC('h c', 0, 'code') + DC('b', 380) + DC('k c', 0, 'arrow-up-right') + DC('t', 250, 'star') + DC('h', 330) + DC('o c', 0, 'zap') + DC('k', 300) + DC('b c', 0, 'smartphone') + DC('h', 420) + DC('t c', 0, 'shield-check') + DC('o', 340) + DC('k c', 0, 'palette') + DC('b', 300) },
+  ];
+  ROWS.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'row ' + r.cls;
+    row.style.top = r.y + 'px';
+    row.style.height = r.h + 'px';
+    row.innerHTML = `<div class="track">${r.html}</div>`;
+    document.getElementById(r.top ? 'wallTop' : 'wall').appendChild(row);
+    r.el = row; r.track = row.firstChild;
+  });
+  document.querySelectorAll('[data-ic]').forEach(el => { el.innerHTML = svg(ICONS[el.dataset.ic]); });
+
+  Reel.ready.then(() => {
+    const $ = s => document.querySelector(s);
+    const $$ = s => gsap.utils.toArray(s);
+    const tl = gsap.timeline({ paused: true, defaults: { ease: 'snap' } });
+
+    // ---------- measured layout ----------
+    // Hero / statement: fit the widest line to the safe width.
+    const fit = (sel, base, target, max) => {
+      const el = $(sel); el.style.fontSize = base + 'px';
+      const w = Math.max(...[...el.querySelectorAll('.l')].map(l => l.offsetWidth));
+      const fs = Math.min(max, base * target / w); el.style.fontSize = fs.toFixed(2) + 'px'; return fs;
+    };
+    fit('#hero', 176, 900, 196);
+    fit('#state', 156, 880, 180);
+
+    // Lockup: one element with two states (nav pill -> end card).
+    const lock = $('#lockup'), cta = $('#cta');
+    lock.style.fontSize = '100px';
+    const lfs = Math.min(128, 100 * 856 / lock.offsetWidth);
+    lock.style.fontSize = lfs.toFixed(2) + 'px';
+    const lw = lock.offsetWidth, lh = lock.offsetHeight, cw = cta.offsetWidth, ch = cta.offsetHeight;
+    const NAV = { x: 80, y: 272, w: 920, h: 116 }, navCy = NAV.y + NAV.h / 2;
+    const sN = 72 / lh, sC = 0.62;
+    const lockNav = { x: NAV.x + 34, y: navCy - lh * sN / 2, scale: sN };
+    const lockEnd = { x: (1080 - lw) / 2, y: 584, scale: 1 };
+    const ctaNav = { x: NAV.x + NAV.w - 18 - cw * sC, y: navCy - ch * sC / 2, scale: sC };
+    const ctaEnd = { x: (1080 - cw) / 2, y: 968, scale: 1 };
+    gsap.set([lock, cta], { transformOrigin: '0 0' });
+
+
+    // ---------- background drift (whole reel) ----------
+    tl.fromTo('#blobO', { x: 0, y: 0, scale: 1 }, { x: -210, y: 300, scale: 1.12, duration: 10, ease: 'sine.inOut' }, 0)
+      .fromTo('#blobB', { x: 0, y: 0, scale: 1 }, { x: 240, y: -330, scale: 1.1, duration: 10, ease: 'sine.inOut' }, 0)
+      .fromTo('#blobO2', { x: 0, y: 0 }, { x: -260, y: -120, duration: 10, ease: 'sine.inOut' }, 0);
+
+    // ================= S1 — HOOK (0 → 2.0) =================
+    const hl = $$('#hero .l');
+    gsap.set(hl, { transformOrigin: '0% 100%' });
+    tl.fromTo(hl[1], { yPercent: 125, rotation: 5 }, { yPercent: 0, rotation: 0, duration: 0.6 }, 0.02)
+      .fromTo(hl[2], { yPercent: 125, rotation: 5 }, { yPercent: 0, rotation: 0, duration: 0.6 }, 0.44);
+    const tiles = $$('#strip .tile');
+    tl.fromTo(tiles, { x: 1120, rotation: 7 }, { x: 0, rotation: 0, duration: 0.8, stagger: 0.06 }, 0.9)
+      .fromTo('#strip .tile img', { scale: 1.3 }, { scale: 1.02, duration: 1.2, stagger: 0.07, ease: 'swift' }, 0.9)
+      .fromTo('#strip', { x: 56 }, { x: -34, duration: 1.2, ease: 'none' }, 0.9);
+    // exit: lines leave up through their masks, tiles stream off left (same direction the marquee arrives)
+    tl.to(hl, { yPercent: -138, duration: 0.3, ease: 'power3.in', stagger: 0.04 }, 1.5)
+      .fromTo('#stripOut', { x: 0 }, { x: -1500, duration: 0.42, ease: 'power3.in' }, 1.5);   // own wrapper: never fights the tile entrance tweens
+
+    // ================= S2 — MARQUEE WALL (2.0 → 3.5) =================
+    const D0 = 1.8, D1 = 3.9;                       // constant-velocity drift window
+    ROWS.forEach((r, i) => {
+      const L = r.track.offsetWidth;
+      const xa = r.dir < 0 ? -640 - r.e : 640 + r.e - L;
+      tl.fromTo(r.track, { x: xa }, { x: xa + r.dir * r.speed * (D1 - D0), duration: D1 - D0, ease: 'none' }, D0);
+      tl.fromTo(r.el, { x: -r.dir * (1270 + r.e) }, { x: 0, duration: 0.8 }, 1.86 + i * 0.04);
+    });
+    gsap.set('#wipeRot', { transformOrigin: '540px 960px', rotation: -5, y: -95 });
+    gsap.set('#wipe', { transformOrigin: '50% 50%', scaleX: 1.5, scaleY: 186 / 1920, x: 1780 });
+    tl.to('#wipe', { x: 0, duration: 0.8 }, 1.86 + 2 * 0.04);
+
+    // ================= S2 → S3: the orange band opens into a full field =================
+    tl.to(ROWS[2].el, { opacity: 0, duration: 0.2, ease: 'power2.in' }, 3.2)
+      .to('#wipeRot', { rotation: 0, y: 0, duration: 0.5, ease: 'io' }, 3.24)
+      .to('#wipe', { scaleX: 1.04, scaleY: 1.04, duration: 0.5, ease: 'io' }, 3.24)
+      .to(['#wall', '#wallTop'], { autoAlpha: 0, duration: 0.01 }, 3.8);
+
+    // ================= S3 — STATEMENT (3.5 → 5.5) =================
+    const sl = $$('#state .l');
+    gsap.set(sl, { transformOrigin: '0% 100%' });
+    tl.fromTo(sl, { yPercent: 135, rotation: 4 }, { yPercent: 0, rotation: 0, duration: 0.62, stagger: 0.085 }, 3.5);
+    const usp = $$('#usp .chip');
+    gsap.set(usp, { transformOrigin: '0% 50%' });
+    tl.fromTo(usp, { x: i => -170 + i * 70, opacity: 0, scale: 0.86 }, { x: i => i * 70, opacity: 1, scale: 1, duration: 0.55, stagger: 0.08, ease: 'back.out(1.5)' }, 3.78);
+    tl.fromTo('#s3deco', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.35, ease: 'power1.out' }, 3.6)
+      .fromTo('#s3deco .rg', { scale: 0.7 }, { scale: 1, duration: 1.9, stagger: 0.1, ease: 'swift' }, 3.6)
+      .to('#s3deco', { autoAlpha: 0, duration: 0.22, ease: 'power1.in' }, 5.0);
+    tl.to(sl, { yPercent: -145, duration: 0.3, ease: 'power3.in', stagger: 0.04 }, 4.98)
+      .to(usp, { y: 70, opacity: 0, duration: 0.26, ease: 'power2.in', stagger: 0.035 }, 5.0);
+
+    // ================= S3 → S4: the orange field collapses into the first stat card =================
+    const cards = ['#cB', '#cC', '#cD'];
+    gsap.set('#s4wrap', { transformOrigin: '540px 946px' });
+    tl.fromTo('#s4wrap', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01 }, 4.2)    // its orange field takes over from the wipe, same colour, seamless
+      .to('#wipeRot', { autoAlpha: 0, duration: 0.01 }, 4.24)
+      .fromTo('#s4wrap', { scale: 1 }, { scale: 1.026, duration: 2.42, ease: 'none' }, 5.08)
+      .fromTo('#cardA', { clipPath: 'inset(0px 0px 0px 0px round 0px)' }, { clipPath: 'inset(452px 554px 988px 80px round 48px)', duration: 0.6, ease: 'io' }, 5.08)
+      .fromTo(cards, { scale: 0.8 }, { scale: 1, duration: 0.8, stagger: 0.07, ease: 'swift' }, 5.22);
+
+    // ================= S4 — STATS (5.5 → 7.5) =================
+    tl.fromTo('#cA > *', { y: 46, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, stagger: 0.06, ease: 'swift' }, 5.5)
+      .fromTo('#n1', { textContent: 0 }, { textContent: 50, snap: { textContent: 1 }, duration: 0.95, ease: 'power2.out' }, 5.5)
+      .fromTo('#n2', { textContent: 0 }, { textContent: 98, snap: { textContent: 1 }, duration: 1.05, ease: 'power2.out' }, 5.6)
+      .fromTo('#bar2', { scaleX: 0 }, { scaleX: 0.98, duration: 1.05, ease: 'power2.out' }, 5.6)
+      .fromTo('#n3', { textContent: 0 }, { textContent: 5, snap: { textContent: 1 }, duration: 0.8, ease: 'power1.out' }, 5.7)
+      .fromTo('#cC .segs i', { opacity: 0.14 }, { opacity: 1, duration: 0.2, stagger: 0.14, ease: 'power1.out' }, 5.74)
+      .fromTo('#n4', { textContent: 0 }, { textContent: 15, snap: { textContent: 1 }, duration: 0.9, ease: 'power2.out' }, 5.8);
+    // exit: the grid bursts outward from its centre to clear the stage for the logo
+    const out = { duration: 0.36, ease: 'power3.in', opacity: 0 };
+    tl.to(['#cA', '#cardA'], { ...out, x: -150, y: -150 }, 7.18)
+      .to('#cB', { ...out, x: 150, y: -110, scale: 0.9 }, 7.2)
+      .to('#cC', { ...out, x: -150, y: 150, scale: 0.9 }, 7.22)
+      .to('#cD', { ...out, x: 150, y: 190, scale: 0.9 }, 7.24);
+
+    // ================= S5 — END CARD (7.5 → 10) : the nav unpacks =================
+    tl.to('#nav', { opacity: 0, scaleX: 0.9, scaleY: 0.7, duration: 0.3, ease: 'power2.in' }, 7.16)
+      .fromTo(lock, lockNav, { ...lockEnd, duration: 0.8, ease: 'io' }, 7.3)
+      .fromTo(cta, ctaNav, { ...ctaEnd, duration: 0.8, ease: 'io' }, 7.14)
+      .fromTo('#tag .wm > span', { yPercent: 130 }, { yPercent: 0, duration: 0.5, stagger: 0.055 }, 7.98)
+      .fromTo('#url', { y: 34, opacity: 0 }, { y: 0, opacity: 1, duration: 0.42, ease: 'swift' }, 8.16);
+    // photo rows frame the end card: fast arrival, then a slow constant drift through the hold
+    [['#endTop', -1, 0], ['#endBot', 1, 0.06]].forEach(([id, dir, d]) => {
+      const row = $(id + ' .row'), track = $(id + ' .track'), L = track.offsetWidth;
+      const xa = dir < 0 ? -700 : 700 - L;
+      tl.fromTo(track, { x: xa }, { x: xa + dir * 16 * 2.6, duration: 2.6, ease: 'none' }, 7.4)
+        .fromTo(row, { x: -dir * 1400 }, { x: 0, duration: 1.0 }, 7.5 + d);
+    });
+    tl
+      .fromTo('#brand', { scale: 1 }, { scale: 1.022, duration: 2.5, ease: 'none', transformOrigin: '540px 880px' }, 7.5);
+
+    tl.set({}, {}, 10); // pad to exactly 10s
+    Reel.register(tl);
+  });
+</script>
+</body>
+</html>

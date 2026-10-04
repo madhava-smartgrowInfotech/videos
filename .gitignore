@@ -1,0 +1,6 @@
+node_modules/
+.claude/
+
+# Regenerable render output: keep the videos and contact sheets, skip per-frame stills
+out/*/*
+!out/*/contact*.png

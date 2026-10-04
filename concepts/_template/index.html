@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>InboxTales reel — template</title>
+<link rel="stylesheet" href="/shared/base.css">
+<style>
+  .center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 48px; }
+  .logo-lockup { font-size: 112px; }
+  .tag { font-family: var(--serif); font-style: italic; font-weight: 600; font-size: 56px; color: var(--gray-500); }
+  .count { font-size: 160px; font-weight: 700; letter-spacing: -0.05em; color: var(--orange); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="center">
+    <div class="logo-lockup"><img src="/assets/logo-mark.png" alt=""><span>Inbox<span class="tales">Tales</span></span></div>
+    <div class="tag">Digital Excellence, Redefined.</div>
+    <div class="count"><span id="n">0</span>+</div>
+  </div>
+</div>
+<script src="/node_modules/gsap/dist/gsap.min.js"></script>
+<script src="/shared/reel.js"></script>
+<script>
+  // One paused master timeline, exactly 10s. Every visual change is a tween on it.
+  const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
+  tl.from('.logo-lockup', { y: 80, opacity: 0, duration: 0.8 }, 0.3)
+    .from('.tag', { y: 40, opacity: 0, duration: 0.8 }, 0.9)
+    .to('#n', { textContent: 50, snap: { textContent: 1 }, duration: 2, ease: 'power2.out' }, 1.5)
+    .to('.center', { scale: 1.04, duration: 6, ease: 'none' }, 4)
+    .set({}, {}, 10); // pad to exactly 10s
+  Reel.register(tl);
+</script>
+</body>
+</html>

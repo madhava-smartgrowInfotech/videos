@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>InboxTales reel — contrast (dark to light)</title>
+<link rel="stylesheet" href="/shared/base.css">
+<style>
+  #stage { background: var(--charcoal); color: #fff; }
+
+  /* ───────────── dark world ───────────── */
+  #dark { position: absolute; inset: 0; overflow: hidden; background: var(--charcoal); --wp: 0%; }
+  #grid, #sec { clip-path: inset(var(--wp) 0px 0px 0px); }
+  #speed { clip-path: inset(0px 0px calc(100% - var(--wp)) 0px); }
+  .bg-glow { position: absolute; left: 0; top: 0; border-radius: 50%; }
+  .g1 { width: 1800px; height: 1800px; margin: -900px 0 0 -900px;
+        background: radial-gradient(closest-side, rgba(250,70,22,.56) 0%, rgba(250,70,22,.24) 36%, rgba(250,70,22,.07) 66%, rgba(250,70,22,0) 100%); }
+  .g1::before, .g1::after { content: ''; position: absolute; border-radius: 50%; border: 2px solid rgba(250,70,22,.26); }
+  .g1::before { inset: 27%; }
+  .g1::after { inset: 12%; border-color: rgba(255,255,255,.07); }
+  .g2 { width: 1500px; height: 1500px; margin: -750px 0 0 -750px;
+        background: radial-gradient(closest-side, rgba(92,128,255,.20) 0%, rgba(92,128,255,.07) 55%, rgba(92,128,255,0) 100%); }
+  .bg-gridwrap { position: absolute; inset: 0;
+        -webkit-mask-image: radial-gradient(ellipse 95% 72% at 50% 46%, #000 0%, rgba(0,0,0,.45) 58%, transparent 100%);
+                mask-image: radial-gradient(ellipse 95% 72% at 50% 46%, #000 0%, rgba(0,0,0,.45) 58%, transparent 100%); }
+  .bg-grid { position: absolute; left: -35px; top: -115px; width: 1265px; height: 2300px;
+        background-image: linear-gradient(rgba(255,255,255,.06) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,.06) 2px, transparent 2px);
+        background-size: 115px 115px; }
+  .bg-grid b { position: absolute; width: 26px; height: 26px; margin: -12px 0 0 -12px; }
+  .bg-grid b::before, .bg-grid b::after { content: ''; position: absolute; background: rgba(250,70,22,.85); }
+  .bg-grid b::before { left: 12px; top: 0; width: 2px; height: 26px; }
+  .bg-grid b::after  { top: 12px; left: 0; height: 2px; width: 26px; }
+  .bg-scan { position: absolute; inset: 0; background: repeating-linear-gradient(180deg, rgba(255,255,255,.022) 0 2px, transparent 2px 8px); }
+  .bg-vig { position: absolute; inset: 0; background: radial-gradient(ellipse 120% 78% at 50% 46%, transparent 52%, rgba(0,0,0,.6) 100%); }
+  .pill-halo { position: absolute; left: 540px; top: 322px; width: 900px; height: 360px; margin: -180px 0 0 -450px; border-radius: 50%;
+        background: radial-gradient(closest-side, rgba(255,255,255,.16), rgba(255,255,255,0)); }
+
+  .scene { position: absolute; inset: 0; }
+
+  /* masked line reveals */
+  .ln { display: block; overflow: hidden; padding: .08em .12em .17em 0; margin: -.08em 0 -.17em 0; }
+  .in { display: block; }
+  .disp { position: absolute; left: 80px; margin: 0; font-weight: 700; letter-spacing: -.05em; line-height: .94; white-space: nowrap; color: #fff; }
+
+  /* ── hook ── */
+  #hook .disp { top: 656px; font-size: 146px; transform-origin: 0% 50%; }
+  #hook .l1 .in { display: flex; align-items: center; gap: 28px; }
+  #hook .l2 .in, #hook .l3 .in { position: relative; display: inline-block; vertical-align: top; }
+  #hook .l2 .in { font-family: var(--serif); font-style: italic; font-weight: 600; letter-spacing: -.03em; font-size: 1.07em; color: var(--orange); }
+  /* dim "unlit" copy underneath, lit copy wiped in by a scan bar */
+  .ghost { opacity: .17; }
+  #hook .l2 .ghost { opacity: .30; }
+  .lit { position: absolute; left: 0; top: 0; --r: 106%; clip-path: inset(-20% var(--r) -30% -6%); }
+  .bar { position: absolute; top: 10%; height: 86%; left: 0%; width: 6px; margin-left: -3px; border-radius: 3px; opacity: 0; background: #fff; box-shadow: 0 0 34px 8px rgba(250,70,22,.95), 0 0 8px 2px rgba(255,255,255,.9); }
+  .ipill { position: relative; flex: none; display: block; width: 320px; height: 114px; border-radius: 9999px; overflow: hidden; }
+  .ipill .stack { display: block; position: absolute; left: 50%; top: 0; width: 360px; margin-left: -180px; }
+  .ipill .fr { display: block; position: relative; width: 360px; height: 114px; overflow: hidden; }
+  .ipill .fr img { position: absolute; left: 0; top: 0; width: 360px; height: 360px; display: block; }
+  .ipill .fr.a img { top: -139px; }
+  .ipill .fr.b img { top: -96px; }
+  .ipill::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 3px rgba(255,255,255,.22); }
+
+  /* ── services grid ── */
+  .tile { position: absolute; width: 450px; height: 336px; }
+  .tile.cyber { z-index: 2; }
+  .tb { position: absolute; inset: 0; }
+  .tglow { position: absolute; inset: 0; border-radius: 36px; box-shadow: 0 0 80px 4px rgba(250,70,22,.55); opacity: 0; }
+  .tin { position: absolute; inset: 0; border-radius: 36px; overflow: hidden; background: #171A20; }
+  .tin > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .tile.cyber .tin > img { object-position: 50% 100%; }
+  .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,17,21,.30) 0%, rgba(15,17,21,0) 34%, rgba(15,17,21,.55) 62%, rgba(15,17,21,.94) 100%); }
+  .dim { position: absolute; inset: 0; background: rgba(15,17,21,.66); }
+  .ring { position: absolute; inset: 0; border-radius: 36px; border: 3px solid var(--orange); opacity: 0; }
+  .edge { position: absolute; inset: 0; border-radius: 36px; border: 2px solid rgba(255,255,255,.10); }
+  .chip { position: absolute; left: 24px; top: 24px; width: 68px; height: 68px; border-radius: 50%; background-color: rgba(15,17,21,.72); border: 2px solid rgba(255,255,255,.22); display: grid; place-items: center; color: #fff; }
+  .chip svg { width: 34px; height: 34px; display: block; }
+  .lbl { position: absolute; left: 28px; bottom: 26px; font-size: 40px; font-weight: 700; letter-spacing: -.03em; line-height: 1.04; color: #fff; }
+
+  /* scan dressing (only on the cyber tile) */
+  .scanline { position: absolute; left: 0; right: 0; top: 0; height: 140px; opacity: 0;
+        background: linear-gradient(180deg, rgba(250,70,22,0) 0%, rgba(250,70,22,.34) 49%, rgba(250,70,22,0) 100%); }
+  .scanline::after { content: ''; position: absolute; left: 0; right: 0; top: 68px; height: 4px; background: var(--orange); box-shadow: 0 0 24px 4px rgba(250,70,22,.9); }
+  .brk { position: absolute; inset: 20px; opacity: 0; }
+  .brk i { position: absolute; width: 44px; height: 44px; border: 0 solid #fff; }
+  .brk i:nth-child(1) { left: 0; top: 0; border-left-width: 4px; border-top-width: 4px; border-top-left-radius: 14px; }
+  .brk i:nth-child(2) { right: 0; top: 0; border-right-width: 4px; border-top-width: 4px; border-top-right-radius: 14px; }
+  .brk i:nth-child(3) { left: 0; bottom: 0; border-left-width: 4px; border-bottom-width: 4px; border-bottom-left-radius: 14px; }
+  .brk i:nth-child(4) { right: 0; bottom: 0; border-right-width: 4px; border-bottom-width: 4px; border-bottom-right-radius: 14px; }
+
+  /* ── security ── */
+  #sec .disp { top: 428px; font-size: 150px; }
+  #sec .l2 { color: var(--orange); }
+  .bugcard { position: absolute; left: 724px; top: 770px; width: 276px; height: 370px; border-radius: 36px; background: rgba(255,255,255,.05); border: 2px solid rgba(255,255,255,.10); }
+  .ret { position: absolute; left: 50%; top: 50%; width: 196px; height: 196px; margin: -98px 0 0 -98px; }
+  .ret i { position: absolute; width: 46px; height: 46px; border: 0 solid var(--orange); }
+  .ret i:nth-child(1) { left: 0; top: 0; border-left-width: 5px; border-top-width: 5px; border-top-left-radius: 16px; }
+  .ret i:nth-child(2) { right: 0; top: 0; border-right-width: 5px; border-top-width: 5px; border-top-right-radius: 16px; }
+  .ret i:nth-child(3) { left: 0; bottom: 0; border-left-width: 5px; border-bottom-width: 5px; border-bottom-left-radius: 16px; }
+  .ret i:nth-child(4) { right: 0; bottom: 0; border-right-width: 5px; border-bottom-width: 5px; border-bottom-right-radius: 16px; }
+  .bugi { position: absolute; left: 50%; top: 50%; width: 116px; height: 116px; margin: -58px 0 0 -58px; display: block; }
+  .bugi path { stroke-dasharray: 1 2; }
+  .caught { position: absolute; left: 50%; top: 50%; width: 60px; height: 60px; margin: -122px 0 0 62px; border-radius: 50%; background: var(--orange); display: grid; place-items: center; box-shadow: 0 0 0 6px #1b1e24; }
+  .caught svg { width: 34px; height: 34px; display: block; }
+  .rows { position: absolute; left: 80px; top: 1172px; width: 920px; display: flex; flex-direction: column; gap: 16px; }
+  .row { height: 88px; border-radius: 28px; background: rgba(255,255,255,.055); border: 2px solid rgba(255,255,255,.10); display: flex; align-items: center; gap: 22px; padding: 0 20px; }
+  .ck { flex: none; width: 52px; height: 52px; border-radius: 50%; background: var(--orange); display: grid; place-items: center; }
+  .ck svg { width: 30px; height: 30px; display: block; }
+  .rt { font-size: 44px; font-weight: 600; letter-spacing: -.025em; color: #fff; white-space: nowrap; }
+
+  /* ── speed ── */
+  #speed .disp { top: 428px; font-size: 184px; }
+  #speed .l2 .in { display: flex; align-items: center; gap: 26px; }
+  .zap { flex: none; width: 132px; height: 132px; color: var(--orange); display: block; margin-top: 10px; }
+  #gauge { position: absolute; left: 240px; top: 800px; width: 600px; height: 600px; }
+  #gauge .gi { position: absolute; inset: 0; }
+  #gauge svg { position: absolute; inset: 0; display: block; overflow: visible; }
+  #garcglow { filter: blur(22px); }
+  .gcenter { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #gnum { font-size: 198px; font-weight: 700; letter-spacing: -.06em; line-height: .9; font-variant-numeric: tabular-nums; margin-right: .05em; }
+  .gof { font-size: 52px; font-weight: 600; letter-spacing: -.02em; color: rgba(255,255,255,.55); margin-top: 2px; }
+  .cwv { position: absolute; left: 0; width: 1080px; top: 1400px; text-align: center; font-size: 46px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
+  .cwv .ln { display: inline-block; vertical-align: top; }
+
+  /* scan wipe between security and speed */
+  #wipe { position: absolute; left: 0; top: -260px; width: 1080px; height: 260px; opacity: 0;
+        background: linear-gradient(180deg, rgba(250,70,22,0) 0%, rgba(250,70,22,.30) 100%); }
+  #wipe::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--orange); box-shadow: 0 0 40px 8px rgba(250,70,22,.85); }
+
+  /* ───────────── inversion ───────────── */
+  #iris { position: absolute; left: -760px; top: -200px; width: 2600px; height: 2600px; border-radius: 50%; background: var(--orange); }
+
+  /* ───────────── light world (starts as the white logo pill) ───────────── */
+  #light { position: absolute; inset: 0; background: #fff; color: var(--charcoal); overflow: hidden;
+        --ct: 272px; --cx: 340px; --cb: 1548px; --cr: 50px; clip-path: inset(var(--ct) var(--cx) var(--cb) var(--cx) round var(--cr)); }
+  .blob { position: absolute; border-radius: 50%; }
+  .b1 { width: 1300px; height: 1300px; left: 330px; top: -520px; background: radial-gradient(closest-side, rgba(250,70,22,.20), rgba(250,70,22,.07) 55%, rgba(250,70,22,0)); }
+  .b2 { width: 1500px; height: 1500px; left: -720px; top: 760px; background: radial-gradient(closest-side, rgba(191,219,254,.95), rgba(219,234,254,.5) 55%, rgba(219,234,254,0)); }
+  #rings { position: absolute; left: -860px; top: -750px; width: 2800px; height: 2800px; display: block; }
+  #lockup { position: absolute; left: 540px; top: 650px; font-size: 118px; white-space: nowrap; }
+  .tag { position: absolute; left: 0; width: 1080px; top: 806px; margin: 0; text-align: center; font-size: 62px; font-weight: 600; letter-spacing: -.035em; line-height: 1.2; white-space: nowrap; }
+  .tag .ln { display: inline-block; vertical-align: baseline; padding: .1em .06em .2em .06em; margin: -.1em 0 -.2em 0; }
+  .tag .ex { font-family: var(--serif); font-style: italic; font-weight: 600; letter-spacing: -.02em; font-size: 1.1em; color: var(--orange); }
+  .cta { position: absolute; left: 540px; top: 966px; height: 116px; padding: 0 20px 0 54px; border-radius: 9999px; background: var(--charcoal); color: #fff; display: flex; align-items: center; gap: 30px; font-size: 46px; font-weight: 600; letter-spacing: -.02em; white-space: nowrap; overflow: hidden; box-shadow: 0 34px 60px -24px rgba(15,17,21,.45); }
+  .cta .arr { flex: none; width: 76px; height: 76px; border-radius: 50%; background: var(--orange); display: grid; place-items: center; }
+  .cta .arr svg { width: 40px; height: 40px; display: block; }
+  .cta .shine { position: absolute; top: 0; bottom: 0; left: -200px; width: 200px; background: linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.22), rgba(255,255,255,0)); }
+  .url { position: absolute; left: 0; width: 1080px; top: 1126px; text-align: center; font-size: 44px; font-weight: 500; letter-spacing: -.01em; color: var(--gray-500); line-height: 1.2; }
+  .strip { position: absolute; left: 0; top: 1556px; width: 1400px; height: 320px; }
+  .card { position: absolute; top: 0; width: 310px; height: 310px; border-radius: 48px; overflow: hidden; box-shadow: 0 40px 70px -30px rgba(15,17,21,.45); }
+  .card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- ═════════ DARK WORLD ═════════ -->
+  <div id="dark">
+    <div class="bg-glow g2"></div>
+    <div class="bg-glow g1"></div>
+    <div class="bg-gridwrap"><div class="bg-grid">
+      <b style="left:230px;top:575px"></b><b style="left:1035px;top:345px"></b><b style="left:115px;top:1725px"></b><b style="left:920px;top:1840px"></b>
+    </div></div>
+    <div class="bg-scan"></div>
+    <div class="bg-vig"></div>
+    <div class="pill-halo"></div>
+
+    <!-- 0.0 – 1.5  hook -->
+    <section class="scene" id="hook">
+      <h1 class="disp">
+        <span class="ln l1"><span class="in">Not just<span class="ipill"><span class="stack"><span class="fr a"><img src="/assets/team-collaboration.png" alt=""></span><span class="fr b"><img src="/assets/digital-marketing.png" alt=""></span></span></span></span></span>
+        <span class="ln l2"><span class="in"><span class="ghost">another</span><span class="lit">another</span><i class="bar"></i></span></span>
+        <span class="ln l3"><span class="in"><span class="ghost">web agency.</span><span class="lit">web agency.</span><i class="bar"></i></span></span>
+      </h1>
+    </section>
+
+    <!-- 1.5 – 3.5  six services -->
+    <section class="scene" id="grid">
+      <div class="tile" style="left:80px;top:420px"><div class="tb">
+        <div class="tglow"></div>
+        <div class="tin"><img src="/assets/web-development.png" alt=""><div class="shade"></div><div class="dim"></div>
+          <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg></div>
+          <div class="lbl">Web<br>Development</div></div>
+        <div class="edge"></div><div class="ring"></div>
+      </div></div>
+
+      <div class="tile" style="left:550px;top:420px"><div class="tb">
+        <div class="tglow"></div>
+        <div class="tin"><img src="/assets/mobile-app-dev.png" alt=""><div class="shade"></div><div class="dim"></div>
+          <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg></div>
+          <div class="lbl">Android &amp;<br>iOS Apps</div></div>
+        <div class="edge"></div><div class="ring"></div>
+      </div></div>
+
+      <div class="tile" style="left:80px;top:776px"><div class="tb">
+        <div class="tglow"></div>
+        <div class="tin"><img src="/assets/enterprise-software.png" alt=""><div class="shade"></div><div class="dim"></div>
+          <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg></div>
+          <div class="lbl">CRM &amp; Billing<br>Software</div></div>
+        <div class="edge"></div><div class="ring"></div>
+      </div></div>
+
+      <div class="tile" style="left:550px;top:776px"><div class="tb">
+        <div class="tglow"></div>
+        <div class="tin"><img src="/assets/creative-design.png" alt=""><div class="shade"></div><div class="dim"></div>
+          <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z"/><path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18"/><path d="m2.3 2.3 7.286 7.286"/><circle cx="11" cy="11" r="2"/></svg></div>
+          <div class="lbl">Creative Design<br>&amp; Video</div></div>
+        <div class="edge"></div><div class="ring"></div>
+      </div></div>
+
+      <div class="tile cyber" style="left:80px;top:1132px"><div class="tb">
+        <div class="tglow"></div>
+        <div class="tin"><img src="/assets/cybersecurity-ops.png" alt=""><div class="shade"></div><div class="dim"></div>
+          <div class="scanline"></div>
+          <div class="brk"><i></i><i></i><i></i><i></i></div>
+          <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></div>
+          <div class="lbl">Cyber Security<br>&amp; Auditing</div></div>
+        <div class="edge"></div><div class="ring"></div>
+      </div></div>
+
+      <div class="tile" style="left:550px;top:1132px"><div class="tb">
+        <div class="tglow"></div>
+        <div class="tin"><img src="/assets/digital-marketing.png" alt=""><div class="shade"></div><div class="dim"></div>
+          <div class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg></div>
+          <div class="lbl">Digital<br>Marketing</div></div>
+        <div class="edge"></div><div class="ring"></div>
+      </div></div>
+    </section>
+
+    <!-- 3.5 – 5.5  security -->
+    <section class="scene" id="sec">
+      <h2 class="disp">
+        <span class="ln l1"><span class="in">Built by</span></span>
+        <span class="ln l2"><span class="in">Bug Hunters</span></span>
+      </h2>
+      <div class="bugcard">
+        <div class="ret"><i></i><i></i><i></i><i></i></div>
+        <svg class="bugi" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path pathLength="1" d="M14 7a4 4 0 0 1 4 4v3a6 6 0 0 1-12 0v-3a4 4 0 0 1 4-4z"/>
+          <path pathLength="1" d="M12 20v-9"/>
+          <path pathLength="1" d="M9 7.13V6a3 3 0 1 1 6 0v1.13"/>
+          <path pathLength="1" d="M14.12 3.88 16 2"/>
+          <path pathLength="1" d="m8 2 1.88 1.88"/>
+          <path pathLength="1" d="M21 5a4 4 0 0 1-3.55 3.97"/>
+          <path pathLength="1" d="M3 5a4 4 0 0 0 3.55 3.97"/>
+          <path pathLength="1" d="M22 13h-4"/>
+          <path pathLength="1" d="M6 13H2"/>
+          <path pathLength="1" d="M21 21a4 4 0 0 0-3.81-4"/>
+          <path pathLength="1" d="M3 21a4 4 0 0 1 3.81-4"/>
+        </svg>
+        <div class="caught"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="rt">Pre-Delivery Audit</span></div>
+        <div class="row"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="rt">OWASP Top 10 Compliance</span></div>
+        <div class="row"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span class="rt">VAPT Ready</span></div>
+      </div>
+    </section>
+
+    <!-- 5.5 – 7.0  speed -->
+    <section class="scene" id="speed">
+      <h2 class="disp">
+        <span class="ln l1"><span class="in">Lightning</span></span>
+        <span class="ln l2"><span class="in">Fast<svg class="zap" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/></svg></span></span>
+      </h2>
+      <div id="gauge"><div class="gi">
+        <svg viewBox="0 0 600 600">
+          <g id="ticks"></g>
+          <circle cx="300" cy="300" r="212" fill="rgba(15,17,21,.62)"/>
+          <circle cx="300" cy="300" r="226" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="28"/>
+          <circle id="garcglow" cx="300" cy="300" r="226" fill="none" stroke="#FA4616" stroke-width="30" stroke-linecap="round" pathLength="100" stroke-dasharray="100 200" transform="rotate(-90 300 300)"/>
+          <circle id="garc" cx="300" cy="300" r="226" fill="none" stroke="#FA4616" stroke-width="28" stroke-linecap="round" pathLength="100" stroke-dasharray="100 200" transform="rotate(-90 300 300)"/>
+        </svg>
+        <div class="gcenter"><div id="gnum">0</div><div class="gof">/100</div></div>
+      </div></div>
+      <div class="cwv"><span class="ln"><span class="in">Core Web Vitals</span></span></div>
+    </section>
+
+    <div id="wipe"></div>
+  </div>
+
+  <!-- ═════════ ORANGE IRIS ═════════ -->
+  <div id="iris"></div>
+
+  <!-- ═════════ LIGHT WORLD (clipped to the logo pill until the inversion) ═════════ -->
+  <div id="light">
+    <div class="blob b2"></div>
+    <div class="blob b1"></div>
+    <svg id="rings" viewBox="0 0 2800 2800" fill="none" stroke="#E5E7EB" stroke-width="2.5">
+      <circle cx="1400" cy="1400" r="470"/><circle cx="1400" cy="1400" r="700"/><circle cx="1400" cy="1400" r="960"/><circle cx="1400" cy="1400" r="1260"/>
+    </svg>
+    <div class="strip">
+      <div class="card" style="left:-30px"><img src="/assets/web-development.png" alt=""></div>
+      <div class="card" style="left:310px"><img src="/assets/creative-design.png" alt=""></div>
+      <div class="card" style="left:650px"><img src="/assets/digital-marketing.png" alt=""></div>
+      <div class="card" style="left:990px"><img src="/assets/mobile-app-dev.png" alt=""></div>
+    </div>
+    <div id="lockup" class="logo-lockup"><img src="/assets/logo-mark.png" alt=""><span>Inbox<span class="tales">Tales</span></span></div>
+    <p class="tag"><span class="ln"><span class="in">Digital</span></span> <span class="ln"><span class="in ex">Excellence</span></span> <span class="ln"><span class="in">Redefined.</span></span></p>
+    <div class="cta"><span>Start a Project</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span><span class="shine"></span></div>
+    <div class="url">inboxtales.com</div>
+  </div>
+
+</div>
+<script src="/node_modules/gsap/dist/gsap.min.js"></script>
+<script src="/node_modules/gsap/dist/CustomEase.min.js"></script>
+<script src="/shared/reel.js"></script>
+<script>
+  gsap.registerPlugin(CustomEase);
+  // 2D transforms only: no compositor layer promotion, so every frame is re-rastered and is a pure function of time.
+  gsap.config({ force3D: false });
+  CustomEase.create('land', 'M0,0 C0.62,0 0.16,1 1,1');      // long, soft settle for the logo move
+  CustomEase.create('swift', 'M0,0 C0.14,0.9 0.22,1 1,1');   // fast attack, calm tail
+
+  // gauge ticks (static markup, deterministic)
+  (function () {
+    const g = document.getElementById('ticks');
+    let s = '';
+    for (let i = 0; i < 60; i++) {
+      const a = (i / 60) * Math.PI * 2 - Math.PI / 2;
+      const r1 = 262, r2 = i % 5 === 0 ? 284 : 276;
+      s += `<line x1="${(300 + Math.cos(a) * r1).toFixed(2)}" y1="${(300 + Math.sin(a) * r1).toFixed(2)}" x2="${(300 + Math.cos(a) * r2).toFixed(2)}" y2="${(300 + Math.sin(a) * r2).toFixed(2)}" stroke="rgba(255,255,255,0.18)" stroke-width="4" stroke-linecap="round"/>`;
+    }
+    g.innerHTML = s;
+  })();
+
+  Reel.ready.then(() => {
+    const $ = (s, c = document) => c.querySelector(s);
+    const $$ = (s, c = document) => gsap.utils.toArray(c.querySelectorAll(s));
+    const ORANGE = '#FA4616';
+
+    // ── logo pill geometry (measured so the pill always hugs the lockup) ──
+    const lockup = $('#lockup');
+    const S0 = 0.366, PILL_H = 100, PILL_CY = 322, END_CY = 650;
+    const pillW = Math.round(lockup.offsetWidth * S0 + 68);
+    const pL = Math.round((1080 - pillW) / 2), pT = PILL_CY - PILL_H / 2;
+
+    // ── initial states (t = 0) ──
+    gsap.set('.g1', { x: 900, y: 1420, opacity: .8, scale: .9 });
+    gsap.set('.g2', { x: 120, y: 260, opacity: 1 });
+    gsap.set('#hook .in', { yPercent: 0 });
+    gsap.set('.ipill', { width: 114 });
+
+    const tiles = $$('.tile');
+    const cyber = $('.tile.cyber');
+    const others = tiles.filter(t => t !== cyber);
+    gsap.set(tiles, { opacity: 0, y: 170, scale: .9 });
+
+    gsap.set('#sec .ln .in', { yPercent: 125 });
+    gsap.set('.bugcard', { opacity: 0, scale: .82 });
+    gsap.set('.ret', { opacity: 0, scale: 1.4 });
+    gsap.set('.caught', { scale: 0 });
+    gsap.set('.row', { opacity: 0, x: -50 });
+    gsap.set('.ck', { scale: 0 });
+
+    gsap.set('#speed', { transformOrigin: '540px 1100px' });
+    gsap.set('#speed .ln .in', { yPercent: 125 });
+    gsap.set('.zap', { scale: 0, rotation: -30, transformOrigin: '50% 60%' });
+    gsap.set('#gauge', { opacity: 0, scale: .82 });
+    gsap.set('#garc, #garcglow', { opacity: 0 });
+
+    gsap.set('#light', { '--ct': pT + 'px', '--cx': pL + 'px', '--cb': (1920 - pT - PILL_H) + 'px', '--cr': (PILL_H / 2) + 'px' });
+    gsap.set(lockup, { xPercent: -50, yPercent: -50, y: PILL_CY - END_CY, scale: S0 });
+    gsap.set('.tag .in', { yPercent: 130 });
+    gsap.set('.cta', { xPercent: -50 });
+    gsap.set('#rings', { transformOrigin: '50% 50%' });
+
+    const tl = gsap.timeline({ paused: true, defaults: { ease: 'expo.out' } });
+
+    // ═════ ambient dark background (0 → 7.4) ═════
+    tl.fromTo('.bg-grid', { y: 0 }, { y: -115, duration: 7.5, ease: 'none' }, 0)
+      .to('.g1', { opacity: 1, scale: 1, duration: .7, ease: 'power2.out' }, 0)
+      .to('.g1', { x: 160, y: 1700, opacity: .75, duration: .7, ease: 'power3.inOut' }, 1.4)
+      .to('.g1', { x: 1010, y: 560, opacity: .8, duration: .7, ease: 'power3.inOut' }, 3.45)
+      .to('.g1', { x: 540, y: 1100, opacity: 1, duration: .6, ease: 'power3.inOut' }, 5.45)
+      .to('.g2', { x: 900, y: 1500, duration: 7.4, ease: 'sine.inOut' }, 0);
+
+    // ═════ 0.0  HOOK — "Not just another web agency." ═════
+    [['#hook .l2', 0.04], ['#hook .l3', 0.2]].forEach(([sel, T]) => {
+      tl.fromTo(sel + ' .lit', { '--r': '106%' }, { '--r': '-8%', duration: .4, ease: 'power2.inOut' }, T)
+        .fromTo(sel + ' .bar', { left: '0%' }, { left: '106%', duration: .4, ease: 'power2.inOut' }, T)
+        .to(sel + ' .bar', { opacity: 1, duration: .05, ease: 'none' }, T)
+        .to(sel + ' .bar', { opacity: 0, duration: .1, ease: 'none' }, T + .32);
+    });
+    tl.to('.ipill', { width: 320, duration: .8, ease: 'swift' }, 0.06)
+      .fromTo('.ipill .fr.a img', { scale: 1.35 }, { scale: 1.08, duration: 1.2, ease: 'power2.out' }, 0)
+      .fromTo('.ipill .stack', { y: 0 }, { y: -114, duration: .4, ease: 'expo.inOut' }, 0.8)
+      .fromTo('.ipill .fr.b img', { scale: 1.3 }, { scale: 1.06, duration: .9, ease: 'power2.out' }, 0.9)
+      .fromTo('#hook .disp', { scale: 1.04 }, { scale: 1, duration: 1.1, ease: 'expo.out' }, 0)   // camera settles, then the type sits dead still
+      // exit: lines leave through their masks
+      .to('#hook .in', { yPercent: -130, duration: .24, ease: 'power2.in', stagger: .035 }, 1.36);
+
+    // ═════ 1.5  SIX SERVICES — tiles rise, then light up on the 8th notes ═════
+    tl.to(tiles, { opacity: 1, y: 0, scale: 1, duration: .5, stagger: .035 }, 1.62);
+    tiles.forEach((t, i) => {
+      const T = 2.0 + i * .25;
+      tl.to($('.dim', t), { opacity: 0, duration: .3, ease: 'power2.out' }, T)
+        .fromTo($('.tin > img', t), { scale: 1.2 }, { scale: 1.03, duration: .8 }, T)
+        .to($('.ring', t), { opacity: 1, duration: .08, ease: 'none' }, T)
+        .to($('.ring', t), { opacity: .6, duration: .5, ease: 'power2.out' }, T + .12)
+        .to($('.tglow', t), { opacity: 1, duration: .08, ease: 'none' }, T)
+        .to($('.tglow', t), { opacity: .32, duration: .5, ease: 'power2.out' }, T + .12)
+        .to($('.chip', t), { backgroundColor: ORANGE, borderColor: ORANGE, duration: .2, ease: 'power2.out' }, T)
+        .to($('.tb', t), { scale: 1.04, duration: .1, ease: 'power2.out' }, T)
+        .to($('.tb', t), { scale: 1, duration: .4, ease: 'power2.out' }, T + .1);
+    });
+
+    // ═════ 3.5  SECURITY — the Cyber Security tile becomes the scan window ═════
+    tl.to(others, { opacity: 0, scale: .88, duration: .22, ease: 'power2.in', stagger: .02 }, 3.42)
+      .to(cyber, { left: 80, top: 770, width: 620, height: 370, duration: .55, ease: 'power3.inOut' }, 3.5)
+      .to([$('.lbl', cyber), $('.chip', cyber)], { opacity: 0, duration: .2, ease: 'none' }, 3.5)
+      .to($('.shade', cyber), { opacity: .45, duration: .5, ease: 'none' }, 3.5)
+      .to($('.ring', cyber), { opacity: .95, duration: .4, ease: 'none' }, 3.6)
+      .to($('.tglow', cyber), { opacity: .6, duration: .4, ease: 'none' }, 3.6)
+      .to('#sec .l1 .in', { yPercent: 0, duration: .55 }, 3.6)
+      .to('#sec .l2 .in', { yPercent: 0, duration: .55 }, 3.7)
+      .to('.bugcard', { opacity: 1, scale: 1, duration: .5, ease: 'back.out(1.5)' }, 3.78)
+      .fromTo('.bugi path', { strokeDashoffset: 1, opacity: 0 }, { strokeDashoffset: 0, opacity: 1, duration: .5, ease: 'power2.out', stagger: .03 }, 3.9)
+      .to('.ret', { opacity: 1, scale: 1, duration: .4, ease: 'back.out(2.2)' }, 4.0)
+      .to('.caught', { scale: 1, duration: .4, ease: 'back.out(2.4)' }, 4.5)
+      // scan passes (photo keeps creeping in so the hold never freezes)
+      .to($('.tin > img', cyber), { scale: 1.12, duration: 1.7, ease: 'sine.inOut' }, 3.85)
+      .to($('.brk', cyber), { opacity: 1, duration: .25, ease: 'none' }, 3.95)
+      .to($('.scanline', cyber), { opacity: 1, duration: .15, ease: 'none' }, 4.0)
+      .fromTo($('.scanline', cyber), { y: -150 }, { y: 380, duration: .75, ease: 'power1.inOut' }, 4.0)
+      .to($('.scanline', cyber), { y: -150, duration: .75, ease: 'power1.inOut' }, 4.75);
+    $$('.row').forEach((r, i) => {
+      const T = 4.0 + i * .25;
+      tl.to(r, { opacity: 1, x: 0, duration: .45 }, T)
+        .to($('.ck', r), { scale: 1, duration: .4, ease: 'back.out(2.4)' }, T + .08);
+    });
+
+    // ═════ 5.5  SCAN WIPE → SPEED ═════
+    tl.set('#wipe', { opacity: 1 }, 5.5)
+      .fromTo('#wipe', { y: 0 }, { y: 1920, duration: .5, ease: 'power3.inOut' }, 5.5)
+      .set('#wipe', { opacity: 0 }, 6.0)
+      .fromTo('#dark', { '--wp': '0%' }, { '--wp': '100%', duration: .5, ease: 'power3.inOut' }, 5.5)
+      .to('#speed .disp .l1 .in', { yPercent: 0, duration: .5 }, 5.62)
+      .to('#speed .disp .l2 .in', { yPercent: 0, duration: .5 }, 5.7)
+      .to('.zap', { scale: 1, rotation: 0, duration: .5, ease: 'back.out(2.2)' }, 5.9)
+      .to('#gauge', { opacity: 1, scale: 1, duration: .5 }, 5.72)
+      .to('#garc, #garcglow', { opacity: 1, duration: .06, ease: 'none' }, 5.8)
+      .fromTo('#garc, #garcglow', { strokeDashoffset: 100 }, { strokeDashoffset: 0, duration: .7, ease: 'power2.out' }, 5.8)
+      .fromTo('#gnum', { textContent: 0 }, { textContent: 100, snap: { textContent: 1 }, duration: .7, ease: 'power2.out' }, 5.8)
+      .to('.cwv .in', { yPercent: 0, duration: .5 }, 5.92)
+      // 100 lands on the beat
+      .to('#gauge .gi', { scale: 1.06, duration: .1, ease: 'power2.out' }, 6.5)
+      .to('#gauge .gi', { scale: 1, duration: .45, ease: 'power2.out' }, 6.6);
+    $$('#ticks line').forEach((ln, i) => {
+      tl.to(ln, { stroke: ORANGE, duration: .12, ease: 'none' }, 5.8 + .7 * (1 - Math.sqrt(1 - i / 60)));
+    });
+
+    // ═════ 7.0  THE INVERSION — orange iris, then the logo pill opens into white ═════
+    tl.fromTo('#iris', { opacity: 0 }, { opacity: 1, duration: .07, ease: 'none' }, 6.96)
+      .fromTo('#iris', { scale: .163 }, { scale: 1, duration: .38, ease: 'power3.in' }, 6.98)
+      .to('#speed', { scale: 1.16, duration: .4, ease: 'power2.in' }, 6.96)
+      .to('#light', { '--ct': '0px', '--cx': '0px', '--cb': '0px', '--cr': '0px', duration: .56, ease: 'power3.inOut' }, 7.24)
+      .to(lockup, { y: 0, scale: 1, duration: .74, ease: 'land' }, 7.24)
+      .fromTo('.blob', { opacity: 0 }, { opacity: 1, duration: .5, ease: 'none' }, 7.3)
+      .fromTo('#rings', { scale: .45, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.1 }, 7.4);
+
+    // ═════ 8.0  END CARD ═════
+    tl.to('.tag .in', { yPercent: 0, duration: .5, stagger: .06 }, 7.9)
+      .fromTo('.cta', { scale: .72, opacity: 0, y: 36 }, { scale: 1, opacity: 1, y: 0, duration: .5, ease: 'back.out(1.7)' }, 8.05)
+      .fromTo('.cta .arr', { scale: 0, rotation: -90 }, { scale: 1, rotation: 0, duration: .45, ease: 'back.out(2)' }, 8.15)
+      .fromTo('.url', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: .4, ease: 'power3.out' }, 8.2)
+      .fromTo('.card', { y: 380 }, { y: 0, duration: .75, stagger: .06 }, 7.6)
+      // hold: only drift
+      .fromTo('.strip', { x: 0 }, { x: -90, duration: 2.3, ease: 'none' }, 7.7)
+      .fromTo('.b1', { x: 0, y: 0 }, { x: -70, y: 50, duration: 2.7, ease: 'sine.inOut' }, 7.3)
+      .fromTo('.b2', { x: 0, y: 0 }, { x: 80, y: -60, duration: 2.7, ease: 'sine.inOut' }, 7.3)
+      .to('#rings', { scale: 1.05, duration: 1.5, ease: 'sine.inOut' }, 8.5)
+      .fromTo('.cta .shine', { x: 0 }, { x: 900, duration: .9, ease: 'power2.inOut' }, 9.0)
+      .set({}, {}, 10);
+
+    Reel.register(tl);
+  });
+</script>
+</body>
+</html>

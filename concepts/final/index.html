@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>InboxTales reel — final</title>
+<link rel="stylesheet" href="/shared/base.css">
+<style>
+  /* ───────────── stage / camera ───────────── */
+  #stage { background: #FBFBFC; perspective: 2200px; perspective-origin: 540px 870px; }
+  #bg { position: absolute; inset: 0; }
+  #blobs { position: absolute; inset: 0; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(110px); }
+  .b1 { width: 980px; height: 980px; right: -380px; top: -300px; background: var(--orange); opacity: .12; }
+  .b2 { width: 1150px; height: 1150px; left: -520px; bottom: -420px; background: var(--blue-100); opacity: .85; }
+  .b3 { width: 640px; height: 640px; left: -300px; top: 420px; background: var(--orange); opacity: .06; }
+  #dots { position: absolute; inset: -80px; background-image: radial-gradient(circle, rgba(15,17,21,.17) 1.7px, transparent 2.3px); background-size: 54px 54px;
+          -webkit-mask-image: radial-gradient(ellipse 78% 64% at 50% 46%, rgba(0,0,0,.22) 30%, #000 100%); mask-image: radial-gradient(ellipse 78% 64% at 50% 46%, rgba(0,0,0,.22) 30%, #000 100%); }
+
+  #rig, #world, .st { position: absolute; inset: 0; transform-style: preserve-3d; }
+  #world { transform-origin: 540px 870px; }
+
+  /* ───────────── shared atoms ───────────── */
+  .card { position: absolute; background: #fff; border: 1px solid var(--gray-200); border-radius: 44px;
+          box-shadow: 0 1px 2px rgba(15,17,21,.05), 0 20px 44px -16px rgba(15,17,21,.16), 0 70px 130px -44px rgba(15,17,21,.26); }
+  .tile { position: absolute; left: 0; top: 0; width: 132px; height: 132px; border-radius: 38px; background: #fff; border: 1px solid var(--gray-200);
+          box-shadow: 0 1px 2px rgba(15,17,21,.05), 0 18px 36px -14px rgba(15,17,21,.2), 0 44px 80px -30px rgba(15,17,21,.22);
+          display: grid; place-items: center; color: var(--charcoal); }
+  .tile svg { width: 60px; height: 60px; stroke-width: 1.9; display: block; }
+  .tile.or { background: var(--orange); border-color: transparent; color: #fff; box-shadow: 0 18px 40px -12px rgba(250,70,22,.5), 0 44px 80px -30px rgba(250,70,22,.4); }
+  .tile.dk { background: var(--charcoal); border-color: transparent; color: var(--orange); }
+  [data-ic] > svg { display: block; }
+
+  .disp { margin: 0; font-weight: 700; letter-spacing: -.05em; line-height: .92; }
+  .mask { display: block; overflow: hidden; padding: .12em .08em .2em; margin: -.12em -.08em -.2em; }
+  .ln { display: block; }
+  .or { color: var(--orange); }
+  .photo { position: absolute; overflow: hidden; border-radius: 40px; box-shadow: 0 30px 70px -24px rgba(15,17,21,.45); }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .pht { position: absolute; left: 0; top: 0; width: 196px; height: 196px; border-radius: 48px; overflow: hidden; box-shadow: 0 24px 50px -18px rgba(15,17,21,.45); border: 6px solid #fff; background: #fff; }
+  .pht img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 42px; }
+
+  /* ───────────── S0 · logo → browser ───────────── */
+  .oring { position: absolute; border-radius: 50%; border: 2px solid rgba(15,17,21,.08); }
+  #bframe { left: 380px; top: 748px; width: 320px; height: 244px; border-radius: 80px; }
+  #bcontent { position: absolute; left: 80px; top: 300px; width: 920px; height: 1400px;
+              clip-path: inset(var(--ct, 0px) var(--cr, 0px) var(--cb, 0px) var(--cl, 0px) round var(--rr, 44px)); }
+  .chrome { position: relative; height: 96px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--gray-200); }
+  .chrome .dotz { position: absolute; left: 40px; top: 50%; margin-top: -9px; display: flex; gap: 12px; }
+  .chrome .dotz i { width: 18px; height: 18px; border-radius: 50%; background: #E1E3E8; display: block; }
+  .urlbar { height: 60px; padding: 0 30px 0 24px; border-radius: 30px; background: #F2F3F5; display: flex; align-items: center; gap: 12px;
+            font-size: 30px; font-weight: 500; letter-spacing: -.01em; color: #4B5563; }
+  .urlbar svg { width: 24px; height: 24px; stroke-width: 2.4; color: #9CA3AF; }
+  .nav { height: 124px; padding: 0 48px; display: flex; align-items: center; justify-content: flex-end; }
+  .burger { width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--gray-200); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; }
+  .burger b { width: 28px; height: 3px; border-radius: 2px; background: var(--charcoal); display: block; }
+  .hero { padding: 16px 48px 0; font-size: 150px; }
+  .sub { margin: 30px 48px 0; max-width: 700px; font-size: 44px; line-height: 1.26; letter-spacing: -.015em; color: var(--gray-500); }
+  .btns { margin: 38px 48px 0; display: flex; gap: 20px; align-items: center; }
+  .btn { height: 108px; border-radius: 999px; display: flex; align-items: center; }
+  .btn.dark { padding: 0 44px 0 52px; gap: 18px; background: var(--charcoal); color: #fff; font-size: 38px; font-weight: 600; letter-spacing: -.02em; }
+  .btn.dark svg { width: 36px; height: 36px; stroke-width: 2.4; }
+  .btn.ghost { width: 108px; justify-content: center; border: 2px solid #D5D8DE; color: var(--charcoal); }
+  .btn.ghost svg { width: 42px; height: 42px; }
+  .fold { position: absolute; left: 48px; right: 48px; top: 1012px; display: flex; gap: 24px; }
+  .ph { width: 400px; height: 340px; border-radius: 32px; overflow: hidden; }
+  .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  #lock0 { position: absolute; left: 0; top: 0; font-size: 104px; transform-origin: 0 0; white-space: nowrap; }
+  .wm { display: inline-block; }
+  #cursor { position: absolute; left: 0; top: 0; width: 72px; height: 72px; transform-origin: 20% 20%; filter: drop-shadow(0 8px 10px rgba(15,17,21,.3)); overflow: visible; }
+  #ripple { position: absolute; left: 392px; top: 1238px; width: 160px; height: 160px; margin: -80px 0 0 -80px; border-radius: 50%; border: 5px solid var(--orange); }
+
+  /* ───────────── S1 · security ───────────── */
+  .h1s { position: absolute; left: 80px; top: 376px; font-size: 138px; line-height: .95; white-space: nowrap; }
+  #audit { left: 80px; top: 704px; width: 920px; padding: 44px 48px 34px; }
+  .ahead { display: flex; align-items: center; gap: 24px; }
+  .aicon { width: 80px; height: 80px; border-radius: 24px; background: rgba(250,70,22,.1); color: var(--orange); display: grid; place-items: center; flex: none; }
+  .aicon svg { width: 44px; height: 44px; stroke-width: 2.1; }
+  .atitle { font-size: 40px; font-weight: 600; letter-spacing: -.03em; flex: 1; white-space: nowrap; }
+  .achip { height: 60px; padding: 0 26px; border-radius: 30px; background: var(--charcoal); color: #fff; font-size: 32px; font-weight: 600; display: flex; align-items: center; font-variant-numeric: tabular-nums; flex: none; }
+  .aprog { height: 8px; border-radius: 4px; background: #EEF0F3; margin: 32px 0 10px; overflow: hidden; }
+  .aprog i { display: block; height: 100%; border-radius: 4px; background: var(--orange); transform-origin: 0 50%; }
+  .arow { position: relative; height: 126px; display: flex; align-items: center; gap: 28px; }
+  .arow + .arow { border-top: 1px solid #EEF0F3; }
+  .arow .hl { position: absolute; left: -22px; right: -22px; top: 10px; bottom: 10px; border-radius: 26px; background: rgba(250,70,22,.09); }
+  .box { position: relative; width: 66px; height: 66px; border-radius: 21px; border: 3px solid #D5D8DE; flex: none; }
+  .box .fill { position: absolute; inset: -3px; border-radius: 21px; background: var(--orange); }
+  .box .ck { position: absolute; inset: 9px; width: 42px; height: 42px; fill: none; stroke: #fff; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; }
+  .lbl { position: relative; font-size: 46px; font-weight: 600; letter-spacing: -.03em; color: #9CA3AF; white-space: nowrap; }
+  #secphoto { left: 190px; top: 1392px; width: 640px; height: 440px; }
+  #secphoto img { object-position: 50% 100%; }
+  #secphoto::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,17,21,.0) 40%, rgba(15,17,21,.45)); }
+  .scan { position: absolute; left: 0; right: 0; top: 0; height: 5px; background: var(--orange); box-shadow: 0 0 30px 8px rgba(250,70,22,.55); z-index: 2; }
+
+  /* ───────────── S2 · performance ───────────── */
+  .h2s { position: absolute; left: 80px; top: 316px; font-size: 178px; white-space: nowrap; }
+  .h2s .zap { display: inline-block; width: .62em; height: .62em; margin-left: .1em; vertical-align: -.02em; }
+  .h2s .zap svg { width: 100%; height: 100%; fill: currentColor; stroke-width: 1.2; }
+  #gauge { left: 80px; top: 692px; width: 920px; height: 682px; }
+  #ring { position: absolute; left: 200px; top: 30px; width: 520px; height: 520px; overflow: visible; }
+  #ring circle { fill: none; stroke-width: 30; stroke-linecap: round; }
+  #ring .trk { stroke: #EEF0F3; }
+  #arc { stroke: var(--orange); }
+  #ticks line { stroke: #D5D8DE; stroke-width: 3; stroke-linecap: round; }
+  .gpulse { position: absolute; left: 460px; top: 290px; width: 440px; height: 440px; margin: -220px 0 0 -220px; border-radius: 50%; border: 10px solid var(--orange); }
+  .gnum { position: absolute; left: 0; right: 0; top: 186px; text-align: center; font-size: 176px; font-weight: 700; letter-spacing: -.055em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .gden { position: absolute; left: 0; right: 0; top: 366px; text-align: center; font-size: 36px; font-weight: 600; color: #9CA3AF; letter-spacing: -.01em; }
+  .glabel { position: absolute; left: 0; right: 0; top: 536px; text-align: center; font-size: 60px; font-weight: 700; letter-spacing: -.04em; line-height: 1.2; }
+  #perfphoto { left: 220px; top: 1452px; width: 640px; height: 420px; }
+  .streak { position: absolute; left: 0; height: 5px; border-radius: 3px; background: linear-gradient(90deg, rgba(250,70,22,0), rgba(250,70,22,.85)); }
+
+  /* ───────────── S3 · services + stats ───────────── */
+  .kicker { position: absolute; left: 84px; top: 286px; font-family: var(--serif); font-style: italic; font-weight: 600; font-size: 64px; line-height: 1.2; letter-spacing: -.01em; white-space: nowrap; }
+  .svc { position: absolute; width: 293px; height: 262px; padding: 10px; border-radius: 30px; background: #fff; border: 1px solid var(--gray-200);
+         box-shadow: 0 1px 2px rgba(15,17,21,.05), 0 16px 34px -14px rgba(15,17,21,.18), 0 40px 80px -36px rgba(15,17,21,.24); }
+  .sph { position: relative; height: 176px; border-radius: 22px; overflow: hidden; }
+  .sph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .sic { position: absolute; left: 10px; top: 10px; width: 54px; height: 54px; border-radius: 50%; background: #fff; color: var(--charcoal); display: grid; place-items: center; box-shadow: 0 6px 14px -4px rgba(15,17,21,.35); }
+  .sic svg { width: 28px; height: 28px; stroke-width: 2.2; }
+  .slb { padding: 15px 6px 0 10px; font-size: 40px; font-weight: 600; letter-spacing: -.035em; line-height: 1.1; white-space: nowrap; }
+  #stats { position: absolute; left: 80px; top: 972px; width: 920px; height: 336px; border-radius: 44px; background: var(--charcoal); overflow: hidden;
+           display: grid; grid-template-columns: 1fr 1fr; box-shadow: 0 30px 70px -24px rgba(15,17,21,.55); }
+  #stats::before { content: ''; position: absolute; left: 50%; top: 44px; bottom: 44px; width: 1px; background: rgba(255,255,255,.14); }
+  .stat { padding: 52px 0 0 44px; }
+  .num { font-size: 150px; font-weight: 700; letter-spacing: -.055em; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; transform-origin: 0 80%; display: inline-block; }
+  .num em { font-style: normal; color: var(--orange); margin-left: .03em; }
+  .sl { margin-top: 14px; font-size: 38px; font-weight: 500; letter-spacing: -.02em; color: rgba(255,255,255,.74); white-space: nowrap; }
+  #teamphoto { left: 220px; top: 1366px; width: 640px; height: 420px; }
+
+  /* ───────────── end card ───────────── */
+  #end { position: absolute; inset: 0; }
+  #orbit { position: absolute; inset: 0; transform-origin: 540px 870px; }
+  .ring { position: absolute; border-radius: 50%; border: 2px solid rgba(15,17,21,.075); }
+  .node { position: absolute; }
+  .node.tile { width: 124px; height: 124px; border-radius: 36px; }
+  .node.tile svg { width: 56px; height: 56px; }
+  .node.pht { width: 176px; height: 176px; border-radius: 44px; }
+  .node.pht img { border-radius: 38px; }
+  .endcol { position: absolute; left: 0; right: 0; top: 566px; display: flex; flex-direction: column; align-items: center; transform-origin: 540px 330px; }
+  #lockE { font-size: 116px; white-space: nowrap; }
+  .etag { margin-top: 50px; font-family: var(--serif); font-style: italic; font-weight: 600; font-size: 64px; line-height: 1.25; letter-spacing: -.01em; white-space: nowrap; }
+  .ecta { margin-top: 62px; height: 132px; padding: 0 22px 0 60px; border-radius: 999px; background: var(--charcoal); color: #fff; display: flex; align-items: center; gap: 30px;
+          font-size: 48px; font-weight: 600; letter-spacing: -.025em; box-shadow: 0 30px 60px -22px rgba(15,17,21,.55); }
+  .earr { width: 90px; height: 90px; border-radius: 50%; background: var(--orange); display: grid; place-items: center; }
+  .earr svg { width: 46px; height: 46px; stroke-width: 2.4; }
+  .eurl { margin-top: 42px; font-size: 46px; font-weight: 500; letter-spacing: -.02em; color: #4B5563; }
+  #wipe { position: absolute; left: -140px; top: 0; width: 1360px; height: 3000px; background: var(--orange); border-radius: 50% / 170px; }
+  #wipe2 { position: absolute; left: -140px; top: 0; width: 1360px; height: 3000px; background: var(--charcoal); border-radius: 50% / 170px; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <div id="bg">
+    <div id="blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+    <div id="dots"></div>
+  </div>
+
+  <div id="rig"><div id="world">
+
+    <!-- S0 · logo lockup pill, then unfolds into the site -->
+    <section class="st" id="s0">
+      <div class="oring" style="left:130px;top:460px;width:820px;height:820px"></div>
+      <div class="oring" style="left:-90px;top:240px;width:1260px;height:1260px"></div>
+      <div class="oring" style="left:-330px;top:0px;width:1740px;height:1740px"></div>
+      <div class="pht" id="p0a"><img src="/assets/mobile-app-dev.png" alt=""></div>
+      <div class="pht" id="p0b"><img src="/assets/creative-design.png" alt=""></div>
+      <div class="pht" id="p0c"><img src="/assets/web-development.png" alt=""></div>
+      <div class="tile" id="d0a" data-ic="code"></div>
+      <div class="tile or" id="d0b" data-ic="zap"></div>
+      <div class="tile" id="d0c" data-ic="shield-check"></div>
+      <div class="tile dk" id="d0d" data-ic="smartphone"></div>
+
+      <div class="card" id="bframe"></div>
+      <div id="bcontent">
+        <div class="chrome">
+          <div class="dotz"><i></i><i></i><i></i></div>
+          <div class="urlbar"><span data-ic="lock"></span>inboxtales.com</div>
+        </div>
+        <div class="nav"><div class="burger"><b></b><b></b></div></div>
+        <h1 class="hero disp">
+          <span class="mask"><span class="ln">Digital</span></span>
+          <span class="mask"><span class="ln or">Excellence</span></span>
+          <span class="mask"><span class="ln">Redefined.</span></span>
+        </h1>
+        <p class="sub">We fuse aesthetic design with robust engineering.</p>
+        <div class="btns">
+          <div class="btn dark" id="cta0"><span>Start a Project</span><span data-ic="arrow-right"></span></div>
+          <div class="btn ghost" data-ic="arrow-up-right"></div>
+        </div>
+        <div class="fold">
+          <div class="ph"><img src="/assets/web-development.png" alt=""></div>
+          <div class="ph"><img src="/assets/creative-design.png" alt=""></div>
+        </div>
+      </div>
+      <div id="ripple"></div>
+      <div class="logo-lockup" id="lock0"><img src="/assets/logo-mark.png" alt=""><span class="wm" id="wm0"><span class="inb">Inbox</span><span class="tales">Tales</span></span></div>
+      <svg id="cursor" viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="#0F1115" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    </section>
+
+    <!-- S1 · security audit -->
+    <section class="st" id="s1">
+      <div class="tile" id="d1b" data-ic="file-search"></div>
+      <div class="photo" id="secphoto"><img src="/assets/cybersecurity-ops.png" alt=""><div class="scan"></div></div>
+      <h2 class="disp h1s">
+        <span class="mask"><span class="ln">Built by</span></span>
+        <span class="mask"><span class="ln or">Bug Hunters</span></span>
+      </h2>
+      <div class="card" id="audit">
+        <div class="ahead">
+          <div class="aicon" data-ic="shield-check"></div>
+          <div class="atitle">Cyber Security &amp; Auditing</div>
+          <div class="achip" id="achip"><span id="acnt">0</span>/3</div>
+        </div>
+        <div class="aprog"><i id="aprog"></i></div>
+        <div class="arow"><div class="hl"></div><div class="box"><div class="fill"></div><svg class="ck" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></div><div class="lbl">Pre-Delivery Audit</div></div>
+        <div class="arow"><div class="hl"></div><div class="box"><div class="fill"></div><svg class="ck" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></div><div class="lbl">OWASP Top 10 Compliance</div></div>
+        <div class="arow"><div class="hl"></div><div class="box"><div class="fill"></div><svg class="ck" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></div><div class="lbl">VAPT Ready</div></div>
+      </div>
+      <div class="tile or" id="d1a" data-ic="lock"></div>
+    </section>
+
+    <!-- S2 · performance -->
+    <section class="st" id="s2">
+      <div class="streak" style="top:150px;width:520px"></div>
+      <div class="streak" style="top:236px;width:300px"></div>
+      <div class="streak" style="top:668px;width:420px"></div>
+      <div class="streak" style="top:1424px;width:640px"></div>
+      <div class="streak" style="top:1560px;width:360px"></div>
+      <div class="streak" style="top:1760px;width:520px"></div>
+      <div class="photo" id="perfphoto"><img src="/assets/web-development.png" alt=""></div>
+      <div class="tile dk" id="d2a" data-ic="gauge"></div>
+      <div class="tile" id="d2b" data-ic="code"></div>
+      <h2 class="disp h2s">
+        <span class="mask"><span class="ln">Lightning</span></span>
+        <span class="mask"><span class="ln or">Fast<span class="zap" data-ic="zap"></span></span></span>
+      </h2>
+      <div class="card" id="gauge">
+        <svg id="ring" viewBox="0 0 520 520">
+          <g id="ticks"></g>
+          <circle class="trk" cx="260" cy="260" r="205" stroke-dasharray="966.04 1288.05" transform="rotate(135 260 260)"/>
+          <circle id="arc" cx="260" cy="260" r="205" stroke-dasharray="966.04 1288.05" stroke-dashoffset="966.04" transform="rotate(135 260 260)"/>
+        </svg>
+        <div class="gpulse"></div>
+        <div class="gnum gm"><span id="gnum">0</span></div>
+        <div class="gden gm">/100</div>
+        <div class="glabel gm">Core Web Vitals</div>
+      </div>
+    </section>
+
+    <!-- S3 · services + stats bento -->
+    <section class="st" id="s3">
+      <div class="photo" id="teamphoto"><img src="/assets/team-collaboration.png" alt=""></div>
+      <div class="tile" id="d3a" data-ic="star"></div>
+      <div class="tile or" id="d3b" data-ic="arrow-up-right"></div>
+      <div class="kicker"><span class="mask"><span class="ln">Not just another web agency<span class="or">.</span></span></span></div>
+
+      <div class="svc" style="left:80px;top:404px"><div class="sph"><img src="/assets/web-development.png" style="object-position:50% 42%" alt=""><div class="sic" data-ic="code"></div></div><div class="slb">Web</div></div>
+      <div class="svc" style="left:393.5px;top:404px"><div class="sph"><img src="/assets/mobile-app-dev.png" style="object-position:50% 48%" alt=""><div class="sic" data-ic="smartphone"></div></div><div class="slb">Apps</div></div>
+      <div class="svc" style="left:707px;top:404px"><div class="sph"><img src="/assets/enterprise-software.png" style="object-position:50% 46%" alt=""><div class="sic" data-ic="database"></div></div><div class="slb">CRM</div></div>
+      <div class="svc" style="left:80px;top:686px"><div class="sph"><img src="/assets/creative-design.png" style="object-position:50% 46%" alt=""><div class="sic" data-ic="palette"></div></div><div class="slb">Design</div></div>
+      <div class="svc" style="left:393.5px;top:686px"><div class="sph"><img src="/assets/cybersecurity-ops.png" style="object-position:50% 100%" alt=""><div class="sic" data-ic="shield-check"></div></div><div class="slb">Security</div></div>
+      <div class="svc" style="left:707px;top:686px"><div class="sph"><img src="/assets/digital-marketing.png" style="object-position:50% 46%" alt=""><div class="sic" data-ic="megaphone"></div></div><div class="slb">Marketing</div></div>
+
+      <div id="stats">
+        <div class="stat"><div class="num"><span id="n1">0</span><em>+</em></div><div class="sl">Projects Delivered</div></div>
+        <div class="stat"><div class="num"><span id="n2">0</span><em>%</em></div><div class="sl">Client Satisfaction</div></div>
+      </div>
+    </section>
+
+  </div></div>
+
+  <!-- end card -->
+  <section id="end">
+    <div id="orbit">
+      <div class="ring" style="left:-40px;top:290px;width:1160px;height:1160px"></div>
+      <div class="ring" style="left:-260px;top:70px;width:1600px;height:1600px"></div>
+      <div class="ring" style="left:-500px;top:-170px;width:2080px;height:2080px"></div>
+      <div class="node tile" data-a="-128" data-r="590" data-ic="code"></div>
+      <div class="node tile or" data-a="-90" data-r="508" data-ic="shield-check"></div>
+      <div class="node tile" data-a="-52" data-r="590" data-ic="smartphone"></div>
+      <div class="node pht" data-a="58" data-r="600"><img src="/assets/creative-design.png" alt=""></div>
+      <div class="node pht" data-a="90" data-r="530"><img src="/assets/web-development.png" alt=""></div>
+      <div class="node pht" data-a="122" data-r="600"><img src="/assets/mobile-app-dev.png" alt=""></div>
+    </div>
+    <div class="endcol">
+      <div class="logo-lockup" id="lockE"><img src="/assets/logo-mark.png" alt=""><span class="wm">Inbox<span class="tales">Tales</span></span></div>
+      <div class="etag"><span class="mask"><span class="ln">Let&rsquo;s build the extraordinary.</span></span></div>
+      <div class="ecta" id="ecta"><span>Start a Project</span><span class="earr" data-ic="arrow-up-right"></span></div>
+      <div class="eurl">inboxtales.com</div>
+    </div>
+  </section>
+
+  <div id="wipe2"></div>
+  <div id="wipe"></div>
+</div>
+
+<script src="/node_modules/gsap/dist/gsap.min.js"></script>
+<script src="/node_modules/gsap/dist/CustomEase.min.js"></script>
+<script src="/shared/reel.js"></script>
+<script>
+Reel.ready.then(() => {
+  gsap.registerPlugin(CustomEase);
+  CustomEase.create('outx', '0.16,1,0.3,1');             // long, confident settle
+  CustomEase.create('cam',  'M0,0 C0.66,0 0.14,1 1,1');  // camera move: quick whip, soft landing
+  CustomEase.create('snap', '0.7,0,0.16,1');             // UI morphs
+  CustomEase.create('pop',  '0.3,1.45,0.5,1');           // small overshoot
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+  // ── static DOM prep (not time-dependent) ──
+  const IC = {
+    'lock': '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    'zap': '<path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/>',
+    'shield-check': '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+    'check': '<path d="M20 6 9 17l-5-5"/>',
+    'arrow-up-right': '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
+    'arrow-right': '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+    'code': '<path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>',
+    'smartphone': '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
+    'star': '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
+    'gauge': '<path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>',
+    'file-search': '<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><circle cx="11.5" cy="14.5" r="2.5"/><path d="M13.3 16.3 15 18"/>',
+    'palette': '<path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>',
+    'megaphone': '<path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/><path d="M8 6v8"/>',
+    'database': '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+  };
+  $$('[data-ic]').forEach(el => {
+    el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${IC[el.dataset.ic]}</svg>`;
+  });
+  // gauge tick marks
+  {
+    let s = '';
+    for (let i = 0; i <= 30; i++) {
+      const a = (135 + i * 9) * Math.PI / 180, r1 = 238, r2 = i % 5 === 0 ? 256 : 248;
+      s += `<line x1="${(260 + r1 * Math.cos(a)).toFixed(2)}" y1="${(260 + r1 * Math.sin(a)).toFixed(2)}" x2="${(260 + r2 * Math.cos(a)).toFixed(2)}" y2="${(260 + r2 * Math.sin(a)).toFixed(2)}"/>`;
+    }
+    $('#ticks').innerHTML = s;
+  }
+  // orbit nodes on the end card
+  $$('#orbit .node').forEach(n => {
+    const a = (+n.dataset.a) * Math.PI / 180, r = +n.dataset.r, w = n.offsetWidth;
+    n.style.left = (540 + r * Math.cos(a) - w / 2) + 'px';
+    n.style.top = (870 + r * Math.sin(a) - w / 2) + 'px';
+  });
+
+  // ── timeline ──
+  const tl = gsap.timeline({ paused: true, defaults: { ease: 'outx', duration: 0.6 } });
+
+  // Chain of fromTo steps on one target; every step starts from the previous end state,
+  // so any seek order renders the same frame.
+  function chain(target, start, steps) {
+    let prev = { ...start };
+    steps.forEach(([t, d, ease, to], i) => {
+      const next = { ...prev, ...to };
+      tl.fromTo(target, { ...prev }, { ...next, duration: d, ease, immediateRender: i === 0 }, t);
+      prev = next;
+    });
+  }
+
+  // scene beats (camera lands on these) — all on the 0.5s grid
+  const B1 = 2.0, B2 = 3.5, B3 = 5.0;
+  const Z = B3 - 0.24;        // gauge fly-through starts
+  const W0 = 7.2;             // wipe starts; frame fully covered on the 7.5 beat
+
+  gsap.set(['#s1', '#s2', '#s3', '#end'], { visibility: 'hidden' });
+  gsap.set('#s2', { transformOrigin: '540px 982px' });
+
+  /* ───────────── background ───────────── */
+  chain('#dots', { backgroundPosition: '0px 0px', scale: 1, opacity: 1 }, [
+    [B1 - 0.3, 0.72, 'cam', { backgroundPosition: '-330px -80px' }],
+    [B2 - 0.3, 0.72, 'cam', { backgroundPosition: '-290px -560px' }],
+    [Z, 0.46, 'power3.in', { scale: 1.5, opacity: 0 }],
+    [Z + 0.46, 0.7, 'outx', { scale: 1, opacity: 1 }],
+  ]);
+  chain('#blobs', { x: 0, y: 0, scale: 1 }, [
+    [B1 - 0.3, 0.72, 'cam', { x: -170, y: -40 }],
+    [B2 - 0.3, 0.72, 'cam', { x: -120, y: -300 }],
+    [Z, 1.0, 'power2.inOut', { x: 60, y: -120, scale: 1.12 }],
+    [W0, 0.7, 'power2.inOut', { x: 0, y: 0, scale: 1 }],
+    [8.0, 2.0, 'sine.inOut', { x: -40, y: 30 }],
+  ]);
+  // slow push-in during each beat, released inside each camera move
+  chain('#rig', { z: 0 }, [
+    [0.9, 0.82, 'sine.inOut', { z: 40 }],
+    [B1 - 0.25, 0.5, 'power2.inOut', { z: 0 }],
+    [B1 + 0.3, 0.9, 'sine.inOut', { z: 36 }],
+    [B2 - 0.25, 0.5, 'power2.inOut', { z: 0 }],
+    [B2 + 0.3, 0.9, 'sine.inOut', { z: 36 }],
+    [B3 - 0.25, 0.5, 'power2.inOut', { z: 0 }],
+    [B3 + 0.6, 1.6, 'sine.inOut', { z: 30 }],
+  ]);
+
+  /* ───────────── S0 · lockup pill → browser window ───────────── */
+  const lock0 = $('#lock0');
+  const total = lock0.offsetWidth, LH = lock0.offsetHeight, markW = $('#lock0 img').offsetWidth;
+  const CY = 870;
+  const xB = 540 - total / 2, yA = CY - LH / 2;
+  const sNav = 56 / 104, xC = 128, yC = 300 + 96 + (124 - LH * sNav) / 2;
+  const pill0 = { l: xB - 54, t: CY - 122, w: total + 108, h: 244, r: 122 };   // frame 0: full lockup, pill breathes out
+  const pill = { l: xB - 70, t: CY - 132, w: total + 140, h: 264, r: 132 };
+  const win = { l: 80, t: 300, w: 920, h: 1400, r: 44 };
+  const fv = o => ({ left: o.l, top: o.t, width: o.w, height: o.h, borderRadius: o.r });
+  const cv = o => ({ '--ct': (o.t - 300) + 'px', '--cr': (1000 - o.l - o.w) + 'px', '--cb': (1700 - o.t - o.h) + 'px', '--cl': (o.l - 80) + 'px', '--rr': o.r + 'px' });
+  const M0 = 0.22, MD = 0.58;                            // window morph start / duration
+
+  chain('#bframe', fv(pill0), [
+    [0, M0, 'pop', fv(pill)],
+    [M0, MD, 'snap', fv(win)],
+  ]);
+  chain('#bcontent', cv(pill), [[M0, MD, 'snap', cv(win)]]);
+  chain(lock0, { x: xB, y: yA, scale: 1 }, [
+    [M0, MD, 'snap', { x: xC, y: yC, scale: sNav }],
+  ]);
+
+  // constellation around the logo (icon tiles + site photos), pushed out as the window opens
+  const d0 = [
+    ['#d0a', { x: 150, y: 520, z: 0, rotation: -8 },   { x: 84, y: 84, z: -220, rotation: -12 }],
+    ['#d0b', { x: 812, y: 596, z: 0, rotation: 9 },    { x: 834, y: 124, z: 160, rotation: 12 }],
+    ['#d0c', { x: 96, y: 1080, z: 0, rotation: 6 },    { x: 54, y: 1724, z: 80, rotation: 10 }],
+    ['#d0d', { x: 842, y: 1052, z: 0, rotation: -7 },  { x: 870, y: 1846, z: -200, rotation: -12 }],
+    ['#p0a', { x: 470, y: 318, z: 0, rotation: 5 },    { x: 520, y: -330, z: -200, rotation: 14 }],
+    ['#p0b', { x: 286, y: 1176, z: 0, rotation: -6 },  { x: 120, y: 2020, z: -200, rotation: -16 }],
+    ['#p0c', { x: 594, y: 1236, z: 0, rotation: 5 },   { x: 760, y: 2060, z: -200, rotation: 16 }],
+  ];
+  d0.forEach(([id, a, b], i) => {
+    chain(id, { ...a, scale: 0.9 }, [
+      [0, M0, 'pop', { scale: 1 }],
+      [M0 + (i % 4) * 0.02, 0.6, 'snap', b],
+      [0.95, 1.0, 'sine.inOut', { y: b.y + (i % 2 ? 22 : -22), rotation: b.rotation + (i % 2 ? -4 : 4) }],
+    ]);
+  });
+
+  chain('#s0 .oring', { scale: 0.95, opacity: 1 }, [
+    [0, M0, 'outx', { scale: 1 }],
+    [M0, 0.5, 'snap', { scale: 1.7, opacity: 0 }],
+  ]);
+
+  // browser contents
+  tl.fromTo('#bcontent .chrome', { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' }, 0.42)
+    .fromTo('#bcontent .burger', { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'pop' }, 0.62)
+    .fromTo('#s0 .hero .ln', { yPercent: 130 }, { yPercent: 0, duration: 0.5, stagger: 0.05 }, 0.6)
+    .fromTo('#s0 .sub', { opacity: 0, y: 34 }, { opacity: 1, y: 0, duration: 0.5 }, 0.8)
+    .fromTo('#s0 .btn', { opacity: 0, scale: 0.78 }, { opacity: 1, scale: 1, duration: 0.42, ease: 'pop', stagger: 0.06 }, 0.86)
+    .fromTo('#s0 .ph', { y: 190, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, stagger: 0.08 }, 0.8)
+    .fromTo('#s0 .ph img', { scale: 1.3 }, { scale: 1, duration: 1.3, ease: 'power2.out', stagger: 0.08 }, 0.8);
+
+  // cursor travels to the CTA and clicks on the beat (1.5); hotspot sits lower-right so the label stays readable
+  const cta0 = $('#cta0');
+  const hx = 80 + cta0.offsetLeft + cta0.offsetWidth - 46, hy = 300 + cta0.offsetTop + cta0.offsetHeight - 26;
+  gsap.set('#ripple', { left: hx, top: hy });
+  const CK = 1.5;
+  chain('#cursor', { x: 1010, y: 1640, opacity: 0, scale: 1 }, [
+    [CK - 0.56, 0.5, 'power3.inOut', { x: hx - 13, y: hy - 14, opacity: 1 }],
+    [CK - 0.04, 0.06, 'power2.in', { scale: 0.8 }],
+    [CK + 0.04, 0.3, 'pop', { scale: 1 }],
+  ]);
+  tl.fromTo('#cta0', { scale: 1 }, { scale: 0.94, duration: 0.06, ease: 'power2.in', immediateRender: false }, CK - 0.04)
+    .fromTo('#cta0', { scale: 0.94 }, { scale: 1, duration: 0.34, ease: 'pop', immediateRender: false }, CK + 0.04)
+    .fromTo('#cta0', { backgroundColor: '#0F1115' }, { backgroundColor: '#FA4616', duration: 0.16, ease: 'power2.out' }, CK)
+    .fromTo('#ripple', { scale: 0.25 }, { scale: 3.4, duration: 0.6, ease: 'power2.out' }, CK);
+  chain('#ripple', { opacity: 0 }, [
+    [CK, 0.04, 'none', { opacity: 0.6 }],
+    [CK + 0.04, 0.56, 'power2.out', { opacity: 0 }],
+  ]);
+
+  /* ───────────── camera moves ───────────── */
+  function camMove(from, to, T, dx, dy, rx, ry) {
+    const d = 0.72, st = T - 0.3;
+    tl.set(to, { visibility: 'visible' }, st)
+      .fromTo(to, { x: dx, y: dy }, { x: 0, y: 0, duration: d, ease: 'cam' }, st)
+      .fromTo(from, { x: 0, y: 0 }, { x: -dx, y: -dy, duration: d, ease: 'cam', immediateRender: false }, st)
+      .set(from, { visibility: 'hidden' }, st + d)
+      .fromTo('#world', { rotationX: 0, rotationY: 0, z: 0 }, { rotationX: rx, rotationY: ry, z: -340, duration: d * 0.42, ease: 'power2.in', immediateRender: false }, st)
+      .fromTo('#world', { rotationX: rx, rotationY: ry, z: -340 }, { rotationX: 0, rotationY: 0, z: 0, duration: d * 0.58, ease: 'power3.out', immediateRender: false }, st + d * 0.42);
+  }
+  camMove('#s0', '#s1', B1, 1240, 260, 2, -10);   // whip-pan right
+  camMove('#s1', '#s2', B2, -140, 1960, 9, 0);    // dolly down
+
+  /* ───────────── S1 · Built by Bug Hunters ───────────── */
+  tl.fromTo('#s1 .h1s .ln', { yPercent: 130 }, { yPercent: 0, duration: 0.65, stagger: 0.07 }, B1 - 0.15)
+    .fromTo('#audit', { x: 300, rotationY: -16, z: -160 }, { x: 0, rotationY: 0, z: 0, duration: 0.85 }, B1 - 0.2)
+    .fromTo('#audit .ahead > *', { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.45, stagger: 0.04 }, B1 - 0.14)
+    .fromTo('#audit .arow', { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: 0.5, stagger: 0.05 }, B1 - 0.12)
+    .fromTo('#secphoto', { x: 520, y: 80, z: -160, rotation: 5 }, { x: 0, y: 0, z: -160, rotation: -2, duration: 1.1 }, B1 - 0.2)
+    .fromTo('#secphoto img', { scale: 1.25 }, { scale: 1.02, duration: 1.6, ease: 'power2.out' }, B1 - 0.1)
+    .fromTo('#secphoto .scan', { y: -20 }, { y: 460, duration: 0.75, ease: 'power1.inOut' }, B1 + 0.2);
+  chain('#d1a', { x: 1190, y: 110, z: 180, rotation: 26, scale: 0.8 }, [
+    [B1 - 0.2, 1.0, 'outx', { x: 812, y: 190, rotation: 9, scale: 1 }],
+    [B1 + 0.8, 0.5, 'sine.inOut', { y: 172, rotation: 6 }],
+  ]);
+  chain('#d1b', { x: 420, y: 60, z: -260, rotation: -18 }, [
+    [B1 - 0.2, 1.0, 'outx', { x: 60, y: 70, rotation: -9 }],
+    [B1 + 0.8, 0.5, 'sine.inOut', { y: 86, rotation: -6 }],
+  ]);
+
+  // ticks land on 2.2 / 2.35 / 2.5 — "3/3" turns orange right after the 2.5 beat and holds until the dolly (3.2)
+  const rows = $$('#audit .arow');
+  gsap.set('#audit .hl', { opacity: 0 });
+  [B1 + 0.2, B1 + 0.35, B1 + 0.5].forEach((t, i) => {
+    const row = rows[i];
+    tl.fromTo($('.fill', row), { scale: 0 }, { scale: 1, duration: 0.3, ease: 'pop' }, t)
+      .fromTo($('.ck path', row), { strokeDashoffset: 24 }, { strokeDashoffset: 0, duration: 0.2, ease: 'power2.out' }, t + 0.05)
+      .fromTo($('.lbl', row), { color: '#9CA3AF' }, { color: '#0F1115', duration: 0.2, ease: 'power2.out' }, t)
+      .fromTo($('.box', row), { scale: 1 }, { scale: 1.16, duration: 0.1, ease: 'power2.out' }, t)
+      .fromTo($('.box', row), { scale: 1.16 }, { scale: 1, duration: 0.3, ease: 'power2.out', immediateRender: false }, t + 0.1)
+      .fromTo('#aprog', { scaleX: i / 3 }, { scaleX: (i + 1) / 3, duration: 0.3, immediateRender: i === 0 }, t)
+      .fromTo('#acnt', { textContent: i }, { textContent: i + 1, duration: 0.03, ease: 'none', snap: { textContent: 1 }, immediateRender: i === 0 }, t + 0.08);
+    chain($('.hl', row), { opacity: 0 }, [[t, 0.08, 'none', { opacity: 1 }], [t + 0.08, 0.5, 'power2.out', { opacity: 0 }]]);
+  });
+  const A3 = B1 + 0.6;
+  tl.fromTo('#achip', { backgroundColor: '#0F1115' }, { backgroundColor: '#FA4616', duration: 0.16, ease: 'power2.out' }, A3)
+    .fromTo('#achip', { scale: 1 }, { scale: 1.18, duration: 0.1, ease: 'power2.out' }, A3 - 0.02)
+    .fromTo('#achip', { scale: 1.18 }, { scale: 1, duration: 0.36, ease: 'power2.out', immediateRender: false }, A3 + 0.08)
+    .fromTo('#audit .aicon', { scale: 1 }, { scale: 1.14, duration: 0.1, ease: 'power2.out' }, A3 - 0.02)
+    .fromTo('#audit .aicon', { scale: 1.14 }, { scale: 1, duration: 0.36, ease: 'power2.out', immediateRender: false }, A3 + 0.08);
+
+  /* ───────────── S2 · Lightning Fast ───────────── */
+  tl.fromTo('#s2 .h2s .ln', { yPercent: 130 }, { yPercent: 0, duration: 0.65, stagger: 0.07 }, B2 - 0.14)
+    .fromTo('#s2 .zap', { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: 0.45, ease: 'pop' }, B2 + 0.12)
+    .fromTo('#gauge', { y: 320, rotationX: -18, z: -160 }, { y: 0, rotationX: 0, z: 0, duration: 0.85 }, B2 - 0.2)
+    .fromTo('#arc', { strokeDashoffset: 966.04 }, { strokeDashoffset: 0, duration: 0.42, ease: 'power3.out' }, B2 + 0.02)
+    .fromTo('#gnum', { textContent: 0 }, { textContent: 100, duration: 0.36, ease: 'power2.out', snap: { textContent: 1 } }, B2 + 0.02)
+    .fromTo('#gauge .gnum', { scale: 0.82 }, { scale: 1, duration: 0.5, ease: 'pop' }, B2)
+    .fromTo('#gauge .gden, #gauge .glabel', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.05 }, B2 + 0.08)
+    .fromTo('#gauge .gpulse', { scale: 0.96 }, { scale: 1.34, duration: 0.7, ease: 'power2.out' }, B2 + 0.5)
+    .fromTo('#perfphoto', { y: 420, z: -140, rotation: -4 }, { y: 0, z: -140, rotation: 2, duration: 1.1 }, B2 - 0.2)
+    .fromTo('#perfphoto img', { scale: 1.25 }, { scale: 1.02, duration: 1.6, ease: 'power2.out' }, B2 - 0.1)
+    .fromTo('#s2 .streak', { x: 1260 }, { x: -820, duration: 0.5, ease: 'power2.inOut', stagger: 0.05 }, B2 - 0.05);
+  chain('#gauge .gpulse', { opacity: 0 }, [[B2 + 0.5, 0.05, 'none', { opacity: 0.55 }], [B2 + 0.55, 0.65, 'power2.out', { opacity: 0 }]]);
+  chain('#d2a', { x: 840, y: 520, z: 190, rotation: -30, scale: 0.8, opacity: 1 }, [
+    [B2 - 0.2, 1.0, 'outx', { x: 826, y: 150, rotation: -9, scale: 1 }],
+    [B2 + 0.8, 0.44, 'sine.inOut', { y: 134, rotation: -6 }],
+    [Z, 0.16, 'power2.in', { opacity: 0 }],
+  ]);
+  chain('#d2b', { x: 40, y: 560, z: -250, rotation: 28, scale: 0.8, opacity: 1 }, [
+    [B2 - 0.2, 1.0, 'outx', { x: 70, y: 96, rotation: 8, scale: 1 }],
+    [B2 + 0.8, 0.44, 'sine.inOut', { y: 112, rotation: 5 }],
+    [Z, 0.16, 'power2.in', { opacity: 0 }],
+  ]);
+
+  /* ───────────── S2 → S3 · fly through the gauge ring ───────────── */
+  const ZD = 0.46;
+  const SH = k => `0px 1px 2px 0px rgba(15,17,21,${0.05 * k}), 0px 20px 44px -16px rgba(15,17,21,${0.16 * k}), 0px 70px 130px -44px rgba(15,17,21,${0.26 * k})`;
+  tl.fromTo('#s2', { scale: 1 }, { scale: 7, duration: ZD, ease: 'power3.in', immediateRender: false }, Z)
+    // headline leaves through its masks, photo drops away — no cross-fade
+    .fromTo('#s2 .h2s .ln', { yPercent: 0 }, { yPercent: -135, duration: 0.2, ease: 'power2.in', stagger: 0.03, immediateRender: false }, Z - 0.06)
+    .fromTo('#perfphoto', { y: 0 }, { y: 640, duration: 0.24, ease: 'power2.in', immediateRender: false }, Z - 0.06)
+    .fromTo('#gauge .gm', { opacity: 1 }, { opacity: 0, duration: 0.12, ease: 'power2.in', immediateRender: false }, Z + 0.1)
+    .fromTo('#gauge', { backgroundColor: 'rgba(255,255,255,1)', borderColor: 'rgba(229,231,235,1)', boxShadow: SH(1) },
+                      { backgroundColor: 'rgba(255,255,255,0)', borderColor: 'rgba(229,231,235,0)', boxShadow: SH(0), duration: 0.2, ease: 'power2.in' }, Z + 0.04)
+    .fromTo('#ring .trk, #ticks', { opacity: 1 }, { opacity: 0, duration: 0.18, ease: 'power2.in' }, Z + 0.04)
+    .set('#s3', { visibility: 'visible' }, Z + 0.26)
+    .set('#s2', { visibility: 'hidden' }, Z + ZD);
+
+  /* ───────────── S3 · services + stats ───────────── */
+  const S3 = Z + 0.26;        // next scene first appears small and opaque inside the ring, then flies up to camera
+  const svc = $$('#s3 .svc');
+  [1, 4, 0, 2, 3, 5].forEach((k, i) => {
+    const t = S3 + i * 0.035;
+    tl.fromTo(svc[k], { opacity: 0 }, { opacity: 1, duration: 0.08, ease: 'none' }, t)
+      .fromTo(svc[k], { z: -1700 }, { z: 0, duration: 0.75 }, t)
+      .fromTo($('img', svc[k]), { scale: 1.35 }, { scale: 1, duration: 1.3, ease: 'power2.out' }, t)
+      .fromTo($('.sic', svc[k]), { scale: 0 }, { scale: 1, duration: 0.4, ease: 'pop' }, t + 0.36)
+      .fromTo($('.slb', svc[k]), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.35 }, t + 0.3);
+  });
+  const ST = B3 + 0.4;        // stats card slides up to land on the 5.5 beat; counters done by 6.0
+  tl.fromTo('#s3 .kicker .ln', { yPercent: 130 }, { yPercent: 0, duration: 0.6 }, B3 + 0.16)
+    .fromTo('#stats', { y: 1100, rotationX: -14 }, { y: 0, rotationX: 0, duration: 0.7 }, ST - 0.1)
+    .fromTo('#stats .sl', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.05 }, ST + 0.16)
+    .fromTo('#teamphoto', { y: 700, z: -150, rotation: 4 }, { y: 0, z: -150, rotation: -2, duration: 1.0 }, ST + 0.05)
+    .fromTo('#teamphoto img', { scale: 1.25 }, { scale: 1.02, duration: 1.8, ease: 'power2.out' }, ST + 0.05);
+  [['#n1', 50], ['#n2', 98]].forEach(([id, v]) => {
+    tl.fromTo(id, { textContent: 0 }, { textContent: v, duration: 0.5, ease: 'power2.out', snap: { textContent: 1 } }, ST - 0.04);
+  });
+  tl.fromTo('#stats .num', { scale: 1 }, { scale: 1.08, duration: 0.1, ease: 'power2.out', stagger: 0.04 }, B3 + 0.98)
+    .fromTo('#stats .num', { scale: 1.08 }, { scale: 1, duration: 0.4, ease: 'power2.out', stagger: 0.04, immediateRender: false }, B3 + 1.08);
+  chain('#d3a', { x: 70, y: -220, z: -240, rotation: -30, opacity: 0 }, [
+    [B3 + 0.2, 0.9, 'outx', { x: 96, y: 70, rotation: -10, opacity: 1 }],
+    [B3 + 1.1, 1.0, 'sine.inOut', { y: 90, rotation: -6 }],
+  ]);
+  chain('#d3b', { x: 900, y: -200, z: 170, rotation: 30, opacity: 0 }, [
+    [B3 + 0.25, 0.9, 'outx', { x: 826, y: 96, rotation: 10, opacity: 1 }],
+    [B3 + 1.15, 1.0, 'sine.inOut', { y: 78, rotation: 7 }],
+  ]);
+
+  /* ───────────── wipe → end card ───────────── */
+  const WD = 0.62;
+  tl.fromTo('#wipe2', { y: 1940 }, { y: -3040, duration: WD, ease: 'power2.inOut' }, W0 - 0.06)
+    .fromTo('#wipe', { y: 1940 }, { y: -3040, duration: WD, ease: 'power2.inOut' }, W0)
+    .set('#s3', { visibility: 'hidden' }, W0 + 0.3)
+    .set('#end', { visibility: 'visible' }, W0 + 0.3);
+
+  // the complete lockup is already settling under the wipe, so the wipe's trailing edge reveals it whole
+  const E0 = W0 + 0.28;
+  tl.fromTo('#orbit .ring', { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.9, stagger: 0.06 }, E0)
+    .fromTo('#lockE', { scale: 0.8, y: 70 }, { scale: 1, y: 0, duration: 0.7 }, E0)
+    .fromTo('#end .etag .ln', { yPercent: 130 }, { yPercent: 0, duration: 0.55 }, E0 + 0.24)
+    .fromTo('#ecta', { scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: 'pop' }, E0 + 0.36)
+    .fromTo('#ecta .earr', { rotation: -90, scale: 0.5 }, { rotation: 0, scale: 1, duration: 0.45, ease: 'pop' }, E0 + 0.44)
+    .fromTo('#end .eurl', { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4 }, E0 + 0.5)
+    .fromTo('#orbit .node', { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: 'pop', stagger: 0.04 }, E0 + 0.3)
+    // hold: only slow drift
+    .fromTo('#orbit', { rotation: -5 }, { rotation: 3, duration: 10 - E0, ease: 'power1.out' }, E0)
+    .fromTo('#orbit .node', { rotation: 5 }, { rotation: -3, duration: 10 - E0, ease: 'power1.out' }, E0)
+    .fromTo('#end .endcol', { scale: 1 }, { scale: 1.02, duration: 1.5, ease: 'sine.inOut' }, 8.5)
+    .fromTo('#ecta .earr svg', { x: 0, y: 0 }, { x: 5, y: -5, duration: 0.4, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 9.0);
+
+  tl.set({}, {}, 10);
+  tl.seek(10).seek(0);   // initialise every tween once, in order
+  Reel.register(tl);
+});
+</script>
+</body>
+</html>
